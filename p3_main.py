@@ -14,7 +14,7 @@ class Tournoi:
         self.nbtours = nbtours
 
     def addJoueur(self, joueur):
-        joueur = [joueur, 0]
+        joueur = [joueur, 0]   # joueur + son nombre de points dans le tournoi initialisé à 0
         self.joueurs.append(joueur)
 
     def addTour(self, tour):
@@ -106,7 +106,6 @@ tournoiParis.addJoueur(henri)
 tournoiParis.addJoueur(john)
 # Instancier un tour
 round1 = Tour("Round 1")
-round1.etat
 # Ajouter tour au tournoi
 tournoiParis.addTour(round1)
 # Instancier un match
