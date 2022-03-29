@@ -63,16 +63,16 @@ class Tour:
 
 class Match:
     def __init__(self, joueur1, joueur2):
-        self.resultat1 = [joueur1, 0]
-        self.resultat2 = [joueur2, 0]
+        self.joueur1 = [joueur1, 0]
+        self.joueur2 = [joueur2, 0]
         # self.match = (resultat1, resultat2)
 
     def saveScore(self):
-        score1 = input("Score du joueur " + str(self.resultat1[0].nom) + " " + str(self.resultat1[0].prenom) + " ?")
-        resultat1 = [str(self.resultat1[0].nom) + " " + str(self.resultat1[0].prenom), score1]
-        score2 = input("Score du joueur " + str(self.resultat2[0].nom) + " " + str(self.resultat2[0].prenom) + " ?")
-        resultat2 = [str(self.resultat2[0].nom) + " " + str(self.resultat2[0].prenom), score2]
-        self.match = (resultat1, resultat2)
+        score1 = input("Score du joueur " + str(self.joueur1[0].nom) + " " + str(self.joueur1[0].prenom) + " ?")
+        self.joueur1[1] = score1
+        score2 = input("Score du joueur " + str(self.joueur2[0].nom) + " " + str(self.joueur2[0].prenom) + " ?")
+        self.joueur2[1] = score2
+        self.match = (self.joueur1, self.joueur2)
         print(self.match)
         """
         # maj des points
