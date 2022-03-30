@@ -1,8 +1,10 @@
 import datetime
 
+nbtoursparam = 4
+
 
 class Tournoi:
-    def __init__(self, nom, lieu, debut, fin, timecontrol, description, nbtours=4):
+    def __init__(self, nom, lieu, debut, fin, timecontrol, description, nbtours=nbtoursparam):
         self.nom = nom
         self.lieu = lieu
         self.debut = debut
@@ -13,15 +15,12 @@ class Tournoi:
         self.description = description
         self.nbtours = nbtours
 
-    def addJoueur(self, joueur):
-        joueur = [joueur, 0]   # joueur + son nombre de points dans le tournoi initialisé à 0
-        self.joueurs.append(joueur)
+    def addParticipant(self, participant):
+        participant = [participant, participant.nbpoints]
+        self.joueurs.append(participant)
 
     def addTour(self, tour):
         self.tours.append(tour)
-
-    def saveTournoi(self):  # a coder
-        return "SaveTournoi"
 
 
 class Joueur:
@@ -34,6 +33,16 @@ class Joueur:
 
     def majClassement(self, newclassement):
         self.classement = newclassement
+
+
+class Participant(Joueur):
+    def __init__(self, nom, prenom, tournoi, nbpoints=0):
+        super().__init__(nom, prenom)
+        self.tournoi = tournoi
+        self.nbpoints = nbpoints
+
+    def majPoints(self, pointsgagnes):
+        self.nbpoints = self.nbpoints + pointsgagnes
 
 
 class Tour:
@@ -58,35 +67,25 @@ class Tour:
             # nouvelle liste de paires
         # tour suivant
             #
-        print("générerPaires")
+        pass
 
 
 class Match:
-    def __init__(self, joueur1, joueur2):
-        self.joueur1 = [joueur1, 0]
-        self.joueur2 = [joueur2, 0]
-        # self.match = (resultat1, resultat2)
+    def __init__(self, participant1, participant2):
+        self.participant1 = [participant1, 0]
+        self.participant2 = [participant2, 0]
 
     def saveScore(self):
-        score1 = input("Score du joueur " + str(self.joueur1[0].nom) + " " + str(self.joueur1[0].prenom) + " ?")
-        self.joueur1[1] = score1
-        score2 = input("Score du joueur " + str(self.joueur2[0].nom) + " " + str(self.joueur2[0].prenom) + " ?")
-        self.joueur2[1] = score2
-        self.match = (self.joueur1, self.joueur2)
-        print(self.match)
-        """
-        # maj des points
-        if score1 := score2:
-            self.joueur1.majClassement(self.joueur1.classement+0.5)
-        elif score1 > score2:
-            self.joueur1.majClassement(self.joueur1.classement+1)
-        elif score2 > score1:
-            self.joueur2.majClassement(self.joueur2.classement + 1)
-        """
-    def majPoints(self):  # a coder
-        # if self.match(1)[2] := self.match(2)[2]:
-        print("calculPoints")
+        self.participant1[1] = input("Score du joueur " + str(self.participant1[0].nom) + " " + str(self.participant1[0].prenom) + " ?")
+        self.participant2[1] = input("Score du joueur " + str(self.participant2[0].nom) + " " + str(self.participant2[0].prenom) + " ?")
 
+    def majPointsParticipant(self):
+        if self.participant1[1] := self.participant2[1]:
+            self.participant1.majPoints(0.5)
+        elif self.participant1[1] > self.participant2[1]:
+            self.participant1.majPoints(1)
+        elif self.participant2[1] > self.participant1[1]:
+            self.participant2.majPoints(1)
 
 # Instancier un tournoi
 tournoiParis = Tournoi("Tournoi de Paris", "Paris", "10/03/2022", "10/03/2022", "Blitz", "description")
@@ -112,5 +111,3 @@ tournoiParis.addTour(round1)
 match1 = Match(alice, victor)
 # Ajouter le match au 1er tour
 round1.addMatch(match1)
-
-
