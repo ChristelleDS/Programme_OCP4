@@ -16,7 +16,6 @@ class Tournoi:
         self.nbtours = nbtours
 
     def addParticipant(self, participant):
-        participant = [participant, participant.nbpoints]
         self.joueurs.append(participant)
 
     def addTour(self, tour):
