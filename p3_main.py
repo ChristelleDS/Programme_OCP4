@@ -1,11 +1,25 @@
 import datetime
+import random
+import itertools
+from tinydb import TinyDB, Query
 
-nbtoursparam = 4
+
+class Database:
+    def __init__(self, db_name):
+        self.db_ = TinyDB(str(db_name) + '.json')
+
+    def truncate_table(self, table_):
+        self.db_.table(table_.capitalize()).truncate()
+
+    def insert(self, table_, dictionnaire):
+        self.db_.table(table_.insert(dictionnaire))
 
 
 class Tournoi:
-    def __init__(self, idtournoi, nom, lieu, debut, fin, timecontrol, description, nbtours=nbtoursparam):
-        self.idtournoi = idtournoi # générer l'id? self?
+    """Modèle représentant un tournoi"""
+    idtournoi_counter= itertools.count(1)
+    def __init__(self, nom, lieu, debut, timecontrol, description, nbtours=4, fin=''):
+        self.idtournoi = next(self.idtournoi_counter)
         self.nom = nom
         self.lieu = lieu
         self.debut = debut
@@ -14,7 +28,7 @@ class Tournoi:
         self.joueurs = []
         self.timecontrol = timecontrol
         self.description = description
-        self.nbtours = nbtours
+        self.nbtours = int(nbtours)
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur)
@@ -22,27 +36,54 @@ class Tournoi:
     def addTour(self, tour):
         self.tours.append(tour)
 
+    def cloturerTournoi(self, datefin):
+        self.fin = datetime.datetime.today().strftime('%Y-%m-%d')
+        # Générer rapport des scores à l'issue du tournoi
 
 class Joueur:
-    def __init__(self, idjoueur, nom, prenom, naissance, sexe, classement, nbpoints=0):
-        self.idjoueur = idjoueur # générer l'id?
-        self.nom = nom
-        self.prenom = prenom
-        self.naissance = naissance
+    """Modèle représentant un Joueur"""
+    idjoueur_counter = itertools.count(1)
+    def __init__(self, nom, prenom, dateNaissance, sexe, classement, score=0):
+        self.idjoueur = next(self.idjoueur_counter)
+        self.nom = str(nom)
+        self.prenom = str(prenom)
+        self.dateNaissance = dateNaissance
         self.sexe = sexe
-        self.classement = classement
-        self.nbpoints = nbpoints
+        self.classement = int(classement)    # entier
+        self.score = int(score)    # nb points
+
+    def serialize(self):
+        return { 'idjoueur': self.idjoueur,
+                'nom': self.nom,
+                'prenom': self.prenom,
+                'dateNaissance': self.dateNaissance,
+                'sexe': self.sexe,
+                'classement': self.classement,
+                'score': self.score,
+                }
+
+    def unserialized(serialized_player):
+        idjoueur = serialized_player["idjoueur"]
+        nom = serialized_player["nom"]
+        prenom = serialized_player["prenom"]
+        dateNaissance = serialized_player["dateNaissance"]
+        sexe = serialized_player["sexe"]
+        classement = serialized_player["classement"]
+        score = serialized_player["score"]
+        return Joueur(idjoueur, nom, prenom, dateNaissance, sexe, classement, score)
 
     def majClassement(self, newclassement):
         self.classement = newclassement
 
-    def majPoints(self, pointsgagnes):
-        self.nbpoints = self.nbpoints + pointsgagnes
+    def majScore(self, pointsgagnes):
+        self.score = self.score + pointsgagnes
 
 
 class Tour:
-    def __init__(self, idtour, nom):
-        self.idtour = idtour # générer l'id?
+    idtour_counter = itertools.count(1)
+    def __init__(self, idtournoi, nom):
+        self.idtournoi = str(idtournoi)
+        self.idtour = idtournoi + next(self.idtour_counter)
         self.nom = nom
         self.dateHeureDebut = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         self.dateHeureFin = ""
@@ -67,27 +108,47 @@ class Tour:
 
 
 class Match:
-    def __init__(self, idmatch, joueur1, joueur2, score1=0, score2=0):
-        self.idmatch = idmatch  # générer l'id?
-        self.joueur1 = [joueur1, 0]
-        self.joueur2 = [joueur2, 0]
-        self.score1 = score1
-        self.score2 = score2
+    """Modèle représentant un match"""
+    def __init__(self, idtournoi, idtour, joueur1, joueur2, score1=0, score2=0):
+        self.idtournoi = idtournoi
+        self.idtour = idtour
+        self.idmatch = str(idtournoi) + str(idtour) + str(joueur1) + str(joueur2)
+        self.joueur1 = joueur1
+        #self.joueur1 = [joueur1, score1]
+        self.joueur2 = joueur2
+        self.score1 = int(score1)
+        self.score2 = int(score2)
+
+    def serialize(self):
+        return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'idmatch': self.idmatch, 'joueur1': self.joueur1,
+                'joueur2': self.joueur2, 'score1': self.score1, 'score2':self.score2 }
 
     def saveScore(self):
         self.joueur1[1]  = input("Score du joueur " + str(self.joueur1[0].nom) + " " + str(self.joueur1[0].prenom) + " ?")
         self.joueur2[1] = input("Score du joueur " + str(self.joueur2[0].nom) + " " + str(self.joueur2[0].prenom) + " ?")
 
-    def majPointsJoueur(self):
-        if self.joueur1[1] := self.joueur2[1]:
-            self.joueur1.majPoints(0.5)
-        elif self.joueur1[1] > self.joueur2[1]:
-            self.joueur1.majPoints(1)
-        elif self.joueur2[1] > self.joueur1[1]:
-            self.joueur2.majPoints(1)
+    def calculPoints(self):
+        if score1 := self.score2:
+            self.joueur1.majScore(0.5)
+        elif self.score1 > self.score2:
+            self.joueur1.majScore(1)
+        elif self.score2 > self.score1:
+            self.joueur2.majScore(1)
+
+class Interface:
+    def démarrer_tournoi(self):
+        nom = input("Nom du tournoi à créer: ")
+        lieu = input ("Lieu du tournoi: ")
+        debut = input("Date de début: ")
+        fin = input("Date de fin: ")
+        timecontrol = input("Contrôle du temps (bullet, blitz ou coup rapide?): ")
+        description = input("Description: ")
+        self.__init__()
+        return "Tournoi "+ self.nom+ " crée. ID: "+self.idtournoi
+
 
 # Instancier un tournoi
-tournoiParis = Tournoi("Tournoi de Paris", "Paris", "10/03/2022", "10/03/2022", "Blitz", "description")
+tournoiParis = Tournoi("Tournoi de Paris", "Paris", "10/03/2022", "Blitz", "description")
 # Instancier des joueurs
 roidesEchecs = Joueur("Echecs", "Roi", "01/08/1986", "Homme", 1)
 alex = Joueur("Test", "Alex", "01/12/1995", "Homme", 2)
@@ -103,10 +164,10 @@ tournoiParis.addJoueur(alice)
 tournoiParis.addJoueur(henri)
 tournoiParis.addJoueur(john)
 # Instancier un tour
-round1 = Tour("Round 1")
+round1 = Tour(1,"Round 1")
 # Ajouter tour au tournoi
 tournoiParis.addTour(round1)
 # Instancier un match
-match1 = Match(alice, victor)
+match1 = Match(1, 11, alice, victor)
 # Ajouter le match au 1er tour
 round1.addMatch(match1)
