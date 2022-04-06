@@ -17,6 +17,7 @@ class Database:
 
 class Tournoi:
     idtournoi_counter = itertools.count(1)
+    # all_joueurs = []
 
     def __init__(self, nom, lieu, debut, timecontrol, description, nbtours=4, fin=''):
         self.idtournoi = next(self.idtournoi_counter)
@@ -33,6 +34,7 @@ class Tournoi:
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur)
+        # all_joueurs.append(joueur)
         return joueur.nom + " " + joueur.prenom + " inscrit."
 
     def addTour(self, tour):
@@ -61,11 +63,10 @@ class Tournoi:
         print(joueurs_sorted)
         nb_joueurs = len(joueurs_sorted)
         mid = nb_joueurs/2
-        meilleurs_joueurs = joueurs_sorted[0:mid]
-        mauvais_joueurs = joueurs_sorted[mid:nb_joueurs]
-        for i in meilleurs_joueurs:
-            paires[meilleurs_joueurs[i]] = mauvais_joueurs[i]
-            print(paires.values)
+        meilleurs = joueurs_sorted[0:mid]
+        mauvais = joueurs_sorted[mid:nb_joueurs]
+        for v in map(lambda x, y : x +"/"+ y, meilleurs, mauvais):
+            print(v)
 
 """
         if not self.tours:
