@@ -57,26 +57,26 @@ class Tournoi:
     def genererPaires(self):  # a coder
         paires = {}  # dict avec les paires : match / JOUEUR1 / JOUEUR2
         # 1er tour
-        meilleurs_joueurs = []
-        mauvais_joueurs = []
-        if not self.tours :
-            joueurs_sorted = sorted(self.joueurs.items(), key=lambda t: t[6])
-            print(joueurs_sorted)
-            nb_joueurs = len(joueurs_sorted)
-            mid = nb_joueurs/2
-            meilleurs_joueurs = joueurs_sorted[0:mid]
-            print(meilleurs_joueurs)
-            mauvais_joueurs = joueurs_sorted[mid:nb_joueurs]
-            for i in meilleurs_joueurs:
-                paires[meilleurs_joueurs[i]] = mauvais_joueurs[i]
-                print(paires)
+        joueurs_sorted = sorted(self.joueurs, key=lambda t: t[6])
+        print(joueurs_sorted)
+        nb_joueurs = len(joueurs_sorted)
+        mid = nb_joueurs/2
+        meilleurs_joueurs = joueurs_sorted[0:mid]
+        mauvais_joueurs = joueurs_sorted[mid:nb_joueurs]
+        for i in meilleurs_joueurs:
+            paires[meilleurs_joueurs[i]] = mauvais_joueurs[i]
+            print(paires.values)
+
+"""
+        if not self.tours:
         else:
             #
             pass
-
+"""
 
 class Joueur:
     idjoueur_counter = itertools.count(1)
+    all_joueurs = []
 
     def __init__(self, nom, prenom, naissance, sexe, classement, score=0):
         self.idjoueur = next(self.idjoueur_counter)
@@ -86,7 +86,14 @@ class Joueur:
         self.sexe = sexe
         self.classement = int(classement)    # entier
         self.score = int(score)    # nb points
+        Joueur.all_joueurs.append(self)
         print(self.nom + " " + self.prenom + " crée. ID:" + str(self.idjoueur))
+
+    def __str__(self):
+        return f"{self.nom} {self.prenom}"
+
+    def __repr__(self):
+        return f"{self.idjoueur} {self.nom} {self.prenom}, classement : {self.classement}"
 
     def serialize(self):
         return {'idjoueur': self.idjoueur,
@@ -248,6 +255,7 @@ tournoiParis.addTour(round1)
 match1 = Match(1, 11, alice, victor)
 # Ajouter le match au 1er tour
 round1.addMatch(match1)
+print(Joueur.all_joueurs)
 tournoiParis.genererPaires()
 
 
