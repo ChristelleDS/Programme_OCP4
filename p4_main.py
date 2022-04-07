@@ -3,9 +3,6 @@ import itertools
 from tinydb import TinyDB, Query
 
 
-classement_tournoi = {}
-
-
 class Database:
     # db = TinyDB('echecs_db.json')
     def __init__(self, db_name):
@@ -37,7 +34,6 @@ class Tournoi:
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur)
-        classement_tournoi = {joueur.idjoueur : joueur.score}
         return str(joueur) + " inscrit."
 
     def addTour(self, tour):
@@ -47,7 +43,6 @@ class Tournoi:
     def cloturerTournoi(self):
         self.fin = datetime.datetime.today().strftime('%Y-%m-%d')
         print(self.nom + " cloturé.")
-        print(classement_tournoi)
 
     def serialize(self):
         return {'idtournoi': self.idtournoi,
@@ -61,25 +56,23 @@ class Tournoi:
                 'description': self.description,
                 'nbtours': self.nbtours
                 }
-"""
-    def genererPaires(self):  # a coder
-        paires = {}  # dict avec les paires : match / JOUEUR1 / JOUEUR2
-        # 1er tour
-        joueurs_sorted = sorted(self.joueurs.items(), key=lambda t: t[6])
-        print(joueurs_sorted)
-        nb_joueurs = len(joueurs_sorted)
-        mid = nb_joueurs/2
-        meilleurs = joueurs_sorted[0:mid]
-        mauvais = joueurs_sorted[mid:nb_joueurs]
-        for v in map(lambda x, y : x +"/"+ y, meilleurs, mauvais):
-            print(v)
 
-
-        if not self.tours:
+    def genererPaires(self):
+        paires = []
+        nb_joueurs = len(self.joueurs)
+        mid = int(nb_joueurs/2)
+        # 1er tour : tri par classement
+        if len(self.tours) == 1 :
+            self.joueurs.sort(key=lambda x:x.classement, reverse=False)
+            for paire in map(lambda x,y:[x,y],self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
+                paires.append(paire)
+        # tours suivants : tri par score et par classement si égalité de score
         else:
-            #
-            pass
-"""
+            self.joueurs.sort(key=lambda x:x.classement, reverse=False)
+            self.joueurs.sort(key=lambda x:x.score, reverse=True)
+            for paire in map(lambda x,y:[x,y],self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
+                paires.append(paire)
+        print(paires)
 
 class Joueur:
     idjoueur_counter = itertools.count(1)
@@ -126,7 +119,6 @@ class Joueur:
 
     def majScore(self, pointsgagnes):
         self.score = self.score + pointsgagnes
-        classement_tournoi[self.idjoueur] = self.score
         return "score mis à jour"
 
 
@@ -174,21 +166,19 @@ class Match:
     def saveScore(self):
         self.score1 = input("Score de " + str(self.joueur1) + " ?")
         self.score2 = input("Score de " + str(self.joueur2) + " ?")
-        print(match1.idmatch + ": score sauvegardé.")
+        print(self.idmatch + ": score sauvegardé.")
         if self.score1 == self.score2:
             self.joueur1.majScore(0.5)
             self.joueur2.majScore(0.5)
-            print("EGALITE:")
+            print("EGALITE: +0.5 points")
             print(str(self.joueur1) + " : " + str(self.joueur1.score) + " points.")
             print(str(self.joueur2) + " : " + str(self.joueur2.score) + " points.")
         elif self.score1 > self.score2:
             self.joueur1.majScore(1)
-            print(str(self.joueur1) + " GAGNANT:")
-            print(str(self.joueur1) + " : " + str(self.joueur1.score) + " points.")
+            print(str(self.joueur1) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur1.score))
         elif self.score2 > self.score1:
             self.joueur2.majScore(1)
-            print(str(self.joueur2) + " GAGNANT:")
-            print(str(self.joueur2) + " : " + str(self.joueur2.score) + " points.")
+            print(str(self.joueur2) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur2.score))
 
 """
 class Menu:
@@ -267,18 +257,23 @@ round1 = Tour(1,"Round 1")
 # Ajouter tour au tournoi
 tournoiParis.addTour(round1)
 # Instancier un match
+"""
 match1 = Match(1, 11, alice, victor)
 match2 = Match(1, 12, junior, alex)
 match3 = Match(1, 13, henri, john)
+match4 = Match(1, 14, roidesEchecs, julie)
 # Ajouter le match au 1er tour
 round1.addMatch(match1)
 round1.addMatch(match2)
 round1.addMatch(match3)
+"""
 print(tournoiParis.joueurs)
+"""
 match1.saveScore()
 match2.saveScore()
 match3.saveScore()
-print(classement_tournoi)
+"""
+tournoiParis.genererPaires()
 
 
 
