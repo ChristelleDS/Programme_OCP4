@@ -4,15 +4,15 @@ from tinydb import TinyDB, Query
 
 
 class Database:
-    # db = TinyDB('echecs_db.json')
     def __init__(self, db_name):
         self.db_ = TinyDB(str(db_name) + '.json')
 
     def truncate_table(self, table_):
         self.db_.table(table_.capitalize()).truncate()
 
-    def insert(self, table_, dictionnaire):
-        self.db_.table(table_.insert(dictionnaire))
+    def insert(self, objet_):
+        table_ = str(type(objet_)).capitalize()
+        self.db_.table(table_).insert(objet_.serialize())
 
 
 class Tournoi:
@@ -26,7 +26,6 @@ class Tournoi:
         self.fin = fin
         self.tours = []
         self.joueurs = []
-        #self.joueurs = ";".join(joueurs_tournoi)
         self.timecontrol = timecontrol
         self.description = str(description)
         self.nbtours = int(nbtours)
@@ -69,29 +68,35 @@ class Tournoi:
         # tours suivants : tri par score et par classement si égalité de score
         else:
             self.joueurs.sort(key=lambda x:x.classement, reverse=False)
-            self.joueurs.sort(key=lambda x:x.score, reverse=True)
+            self.joueurs.sort(key=lambda x:x.points, reverse=True)
             for paire in map(lambda x,y:[x,y],self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
-                paires.append(paire)
+                if paire not in paires:
+                    paires.append(paire)
+                else:
+                    paire[1]=next(self.joueurs[mid:nb_joueurs])
+                    paires.append(paire)
+                    pass
         print(paires)
+
 
 class Joueur:
     idjoueur_counter = itertools.count(1)
 
-    def __init__(self, nom, prenom, naissance, sexe, classement, score=0):
+    def __init__(self, nom, prenom, naissance, sexe, classement, points=0):
         self.idjoueur = next(self.idjoueur_counter)
         self.nom = str(nom)
         self.prenom = str(prenom)
         self.date_naissance = naissance
         self.sexe = sexe
         self.classement = int(classement)    # entier
-        self.score = int(score)    # nb points
+        self.points = int(points)    # nb points
         print(self.nom + " " + self.prenom + " crée. ID:" + str(self.idjoueur))
 
     def __str__(self):
         return f"{self.nom} {self.prenom}"
 
     def __repr__(self):
-        return f"{self.idjoueur} {self.nom} {self.prenom}, classement : {self.classement}, score : {self.score}"
+        return f"{self.idjoueur} {self.nom} {self.prenom}, classement : {self.classement}, points : {self.points}"
 
     def serialize(self):
         return {'idjoueur': self.idjoueur,
@@ -100,7 +105,7 @@ class Joueur:
                 'date_naissance': self.date_naissance,
                 'sexe': self.sexe,
                 'classement': self.classement,
-                'score': self.score,
+                'points': self.points,
                 }
 
     def unserialized(serialized_player):
@@ -110,15 +115,15 @@ class Joueur:
         date_naissance = serialized_player["date_naissance"]
         sexe = serialized_player["sexe"]
         classement = serialized_player["classement"]
-        score = serialized_player["score"]
-        return Joueur(idjoueur, nom, prenom, date_naissance, sexe, classement, score)
+        points = serialized_player["points"]
+        return Joueur(idjoueur, nom, prenom, date_naissance, sexe, classement, points)
 
     def majClassement(self, newclassement):
         self.classement = newclassement
         print("classement mis à jour.")
 
-    def majScore(self, pointsgagnes):
-        self.score = self.score + pointsgagnes
+    def majPoints(self, pointsgagnes):
+        self.points = self.points + pointsgagnes
         return "score mis à jour"
 
 
@@ -168,17 +173,17 @@ class Match:
         self.score2 = input("Score de " + str(self.joueur2) + " ?")
         print(self.idmatch + ": score sauvegardé.")
         if self.score1 == self.score2:
-            self.joueur1.majScore(0.5)
-            self.joueur2.majScore(0.5)
+            self.joueur1.majPoints(0.5)
+            self.joueur2.majPoints(0.5)
             print("EGALITE: +0.5 points")
-            print(str(self.joueur1) + " : " + str(self.joueur1.score) + " points.")
-            print(str(self.joueur2) + " : " + str(self.joueur2.score) + " points.")
+            print(str(self.joueur1) + " : " + str(self.joueur1.points) + " points.")
+            print(str(self.joueur2) + " : " + str(self.joueur2.points) + " points.")
         elif self.score1 > self.score2:
-            self.joueur1.majScore(1)
-            print(str(self.joueur1) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur1.score))
+            self.joueur1.majPoints(1)
+            print(str(self.joueur1) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur1.points))
         elif self.score2 > self.score1:
-            self.joueur2.majScore(1)
-            print(str(self.joueur2) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur2.score))
+            self.joueur2.majPoints(1)
+            print(str(self.joueur2) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur2.points))
 
 """
 class Menu:
@@ -231,7 +236,9 @@ controller.ui.creer_tournoi()
 controller.ui.inscrire_joueur(TEST)
 """
 # Créer la bdd
-db = TinyDB('echecs_db.json')
+#db = TinyDB('echecs_db.json')
+data = Database('echecs_db')
+print(data.db_)
 # Instancier un tournoi
 tournoiParis = Tournoi("TournoiParis", "Paris", "10/03/2022", "Blitz", "description")
 # Instancier des joueurs
