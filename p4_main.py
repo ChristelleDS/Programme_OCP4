@@ -3,6 +3,9 @@ import itertools
 from tinydb import TinyDB, Query
 
 
+classement_tournoi = {}
+
+
 class Database:
     # db = TinyDB('echecs_db.json')
     def __init__(self, db_name):
@@ -34,6 +37,7 @@ class Tournoi:
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur)
+        classement_tournoi = {joueur.idjoueur : joueur.score}
         return str(joueur) + " inscrit."
 
     def addTour(self, tour):
@@ -43,6 +47,7 @@ class Tournoi:
     def cloturerTournoi(self):
         self.fin = datetime.datetime.today().strftime('%Y-%m-%d')
         print(self.nom + " cloturé.")
+        print(classement_tournoi)
 
     def serialize(self):
         return {'idtournoi': self.idtournoi,
@@ -121,6 +126,7 @@ class Joueur:
 
     def majScore(self, pointsgagnes):
         self.score = self.score + pointsgagnes
+        classement_tournoi[self.idjoueur] = self.score
         return "score mis à jour"
 
 
@@ -166,18 +172,23 @@ class Match:
                 'score1': self.score1, 'score2':self.score2 }
 
     def saveScore(self):
-        self.joueur1[1] = input("Score de " + str(self.joueur1[0].nom) + " " +
-                                 str(self.joueur1[0].prenom) + " ?")
-        self.joueur2[1] = input("Score de " + str(self.joueur2[0].nom) + " " +
-                                str(self.joueur2[0].prenom) + " ?")
-
-    def calculPoints(self):
+        self.score1 = input("Score de " + str(self.joueur1) + " ?")
+        self.score2 = input("Score de " + str(self.joueur2) + " ?")
+        print(match1.idmatch + ": score sauvegardé.")
         if self.score1 == self.score2:
             self.joueur1.majScore(0.5)
+            self.joueur2.majScore(0.5)
+            print("EGALITE:")
+            print(str(self.joueur1) + " : " + str(self.joueur1.score) + " points.")
+            print(str(self.joueur2) + " : " + str(self.joueur2.score) + " points.")
         elif self.score1 > self.score2:
             self.joueur1.majScore(1)
+            print(str(self.joueur1) + " GAGNANT:")
+            print(str(self.joueur1) + " : " + str(self.joueur1.score) + " points.")
         elif self.score2 > self.score1:
             self.joueur2.majScore(1)
+            print(str(self.joueur2) + " GAGNANT:")
+            print(str(self.joueur2) + " : " + str(self.joueur2.score) + " points.")
 
 """
 class Menu:
@@ -257,10 +268,17 @@ round1 = Tour(1,"Round 1")
 tournoiParis.addTour(round1)
 # Instancier un match
 match1 = Match(1, 11, alice, victor)
+match2 = Match(1, 12, junior, alex)
+match3 = Match(1, 13, henri, john)
 # Ajouter le match au 1er tour
 round1.addMatch(match1)
+round1.addMatch(match2)
+round1.addMatch(match3)
 print(tournoiParis.joueurs)
-print(tournoiParis.joueurs.split(";"))
+match1.saveScore()
+match2.saveScore()
+match3.saveScore()
+print(classement_tournoi)
 
 
 
