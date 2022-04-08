@@ -131,7 +131,7 @@ class Joueur:
                 'classement': self.classement,
                 'points': self.points,
                 }
-
+"""
     def unserialized(serialized_player):
         idjoueur = serialized_player["idjoueur"]
         nom = serialized_player["nom"]
@@ -141,14 +141,14 @@ class Joueur:
         classement = serialized_player["classement"]
         points = serialized_player["points"]
         return Joueur(idjoueur, nom, prenom, date_naissance, sexe, classement, points)
-
+"""
     def majClassement(self, newclassement):
         self.classement = newclassement
         print("classement mis à jour.")
 
     def majPoints(self, pointsgagnes):
         self.points = self.points + pointsgagnes
-        return "score mis à jour"
+        print("score mis à jour")
 
 
 class Tour:
