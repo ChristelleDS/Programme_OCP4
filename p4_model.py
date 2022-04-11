@@ -25,6 +25,9 @@ class Database:
         table_ = str(type(objet_)).capitalize()
         self.db.table(table_).update(objet_.serialize())
 
+    def get_all(self, table_):
+        return self.db.table(table_.capitalize()).all()
+
 
 class Tournoi:
     idtournoi_counter = itertools.count(1)
@@ -101,7 +104,7 @@ class Tournoi:
 class Joueur:
     idjoueur_counter = itertools.count(1)
 
-    def __init__(self, nom, prenom, naissance, sexe, classement, points=0):
+    def __init__(self, nom, prenom, naissance, sexe, classement=0, points=0):
         self.idjoueur = next(self.idjoueur_counter)
         self.nom = str(nom)
         self.prenom = str(prenom)
@@ -109,13 +112,13 @@ class Joueur:
         self.sexe = sexe
         self.classement = int(classement)    # entier
         self.points = int(points)    # nb points
-        print(self.nom + " " + self.prenom + " crée. ID:" + str(self.idjoueur))
+        print(self.nom + " " + self.prenom + " crée.")
 
     def __str__(self):
         return f"{self.nom} {self.prenom}"
 
     def __repr__(self):
-        return f"{self.idjoueur}, classement : {self.classement}, points : {self.points}"
+        return f"{self.nom} {self.prenom}, classement : {self.classement}, points : {self.points}"
         # return f"{self.idjoueur}"
 
     def serialize(self):
