@@ -7,7 +7,9 @@ db.create('Joueur')
 db.create('Tour')
 db.create('Match')
 
+
 class Menu:
+    @staticmethod
     def creer_tournoi():
         nom = input('Nom du tournoi?')
         lieu = input('Lieu du tournoi?')
@@ -15,7 +17,7 @@ class Menu:
         timecontrol = input('Contrôle du temps (bullet, blitz ou coup rapide?): ')
         description = input('Description?')
         name = nom
-        name = Tournoi(nom, lieu, debut, timecontrol, description )
+        name = Tournoi(nom, lieu, debut, timecontrol, description)
         db.insert(name)
         print("sauvegardé en base de données")
 
@@ -48,6 +50,7 @@ class Controller:
     def __init__(self):
         self.ui = Menu()
         self.queries = Query()
+
 
 controller = Controller()
 Menu.creer_tournoi()

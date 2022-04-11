@@ -1,13 +1,13 @@
 import datetime      # pip install datetime?
 import itertools     # pip install itertools?
-from tinydb import TinyDB, Query , where         # pip install tinydb
+from tinydb import TinyDB, Query, where         # pip install tinydb
 
 
 class Database:
     def __init__(self, db_name):
         self.db = TinyDB(str(db_name) + '.json')
 
-    def create(self,table_):
+    def create(self, table_):
         self.db.table(table_.capitalize())
 
     def truncate(self, table_):
@@ -27,10 +27,10 @@ class Database:
 
 
 class Tournoi:
-    # idtournoi_counter = itertools.count(1)
+    idtournoi_counter = itertools.count(1)
 
     def __init__(self, nom, lieu, debut, timecontrol, description, nbtours=4, fin=''):
-        # self.idtournoi = next(self.idtournoi_counter)
+        self.idtournoi = next(self.idtournoi_counter)
         self.nom = nom
         self.lieu = lieu
         self.debut = debut
@@ -44,7 +44,6 @@ class Tournoi:
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur)
-        db.update(self)
         return str(joueur) + " inscrit."
 
     def addTour(self, tour):
@@ -56,7 +55,7 @@ class Tournoi:
         print(self.nom + " cloturé.")
 
     def serialize(self):
-        return { #'idtournoi': self.idtournoi,
+        return { 'idtournoi': self.idtournoi,
                 'nom': self.nom,
                 'lieu': self.lieu,
                 'date_debut': self.debut,
@@ -73,25 +72,25 @@ class Tournoi:
         nb_joueurs = len(self.joueurs)
         mid = int(nb_joueurs/2)
         # 1er tour : tri par classement
-        if len(self.tours) == 1 :
+        if len(self.tours) == 1:
             # tri des joueurs par classement
-            self.joueurs.sort(key=lambda x:x.classement, reverse=False)
+            self.joueurs.sort(key=lambda x: x.classement, reverse=False)
             print("liste joueurs par classement:")
             print(self.joueurs)
-            for paire in map(lambda x,y:[x,y],self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
+            for paire in map(lambda x, y: [x, y], self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
                 paires.append(paire)
         # tours suivants : tri par points et par classement si égalité de points
         else:
-            self.joueurs.sort(key=lambda x:x.classement, reverse=False)
-            self.joueurs.sort(key=lambda x:x.points, reverse=True)
+            self.joueurs.sort(key=lambda x: x.classement, reverse=False)
+            self.joueurs.sort(key=lambda x: x.points, reverse=True)
             print("liste joueurs par points:")
             print(self.joueurs)
-            for paire in map(lambda x,y:[x,y],self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
+            for paire in map(lambda x, y: [x, y], self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
                 # vérifier que la combinaison n'a pas déjà été joué
-                if paire not in paires: # matchs déjà joués self.tours.matchs
+                if paire not in paires:  # matchs déjà joués self.tours.matchs
                     paires.append(paire)
                     print(paire)
-                else: # si paire déjà joué, second joueur = joueur suivant
+                else:  # si paire déjà joué, second joueur = joueur suivant
                     """ paire[1]=next(paire)[1]
                     print(paire)
                     paires.append(paire) """
@@ -117,7 +116,7 @@ class Joueur:
 
     def __repr__(self):
         return f"{self.idjoueur}, classement : {self.classement}, points : {self.points}"
-        #return f"{self.idjoueur}"
+        # return f"{self.idjoueur}"
 
     def serialize(self):
         return {'idjoueur': self.idjoueur,
@@ -154,12 +153,12 @@ class Tour:
     def serialize(self):
         return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'nom': self.nom,
                 'dateHeureDebut': self.dateHeureDebut, 'dateHeureFin': self.dateHeureFin,
-                'etat': self.etat, 'matchs':self.matchs }
+                'etat': self.etat, 'matchs': self.matchs}
 
-    def addMatch(self,match):
+    def addMatch(self, match):
         result_j1 = [match.joueur1, match.score1]
         result_j2 = [match.joueur2, match.score2]
-        match_result = (result_j1 , result_j2)
+        match_result = (result_j1, result_j2)
         self.matchs.append(match_result)
         print("Match ajouté au tournoi.")
 
@@ -171,6 +170,7 @@ class Tour:
 
 class Match:
     idmatch_counter = itertools.count(1)
+
     def __init__(self, tournoi, tour, joueur1, joueur2, score1=0, score2=0):
         self.idtournoi = tournoi.idtournoi
         self.idtour = tour.idtour
@@ -179,12 +179,12 @@ class Match:
         self.joueur2 = joueur2
         self.score1 = int(score1)
         self.score2 = int(score2)
-        print( "Match "+ str(self.idmatch) + " crée." + str(self.joueur1) + " vs " + str(self.joueur2))
+        print("Match " + str(self.idmatch) + " crée." + str(self.joueur1) + " vs " + str(self.joueur2))
 
     def serialize(self):
         return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'idmatch': self.idmatch,
                 'joueur1': self.joueur1, 'joueur2': self.joueur2,
-                'score1': self.score1, 'score2':self.score2 }
+                'score1': self.score1, 'score2': self.score2}
 
     def saveScore(self):
         self.score1 = input("Score de " + str(self.joueur1) + " ?")
@@ -201,7 +201,6 @@ class Match:
         elif self.score2 > self.score1:
             self.joueur2.majPoints(1)
             print(str(self.joueur2) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur2.points))
-
 
 
 """    
@@ -251,11 +250,3 @@ print(round1.matchs)
 
 tournoiParis.genererPaires()
 """
-
-
-
-
-
-
-
-
