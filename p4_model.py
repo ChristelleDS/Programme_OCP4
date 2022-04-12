@@ -5,6 +5,7 @@ from tinydb import TinyDB, Query, where         # pip install tinydb
 
 class Tournoi:
     idtournoi_counter = itertools.count(1)
+    paires = []
 
     def __init__(self, nom, lieu, debut, timecontrol, description, nbtours=4, fin=''):
         self.idtournoi = next(self.idtournoi_counter)
@@ -21,7 +22,7 @@ class Tournoi:
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur)
-        return str(joueur) + " inscrit."
+        return str(joueur) + " inscrit au tournoi."
 
     def addTour(self, tour):
         self.tours.append(tour)
@@ -45,42 +46,47 @@ class Tournoi:
                 }
 
     def genererPaires(self,tour):
-        paires = []  # réinitialisation en dehors de la classe ?
+          # réinitialisation en dehors de la classe ?
         nb_joueurs = len(self.joueurs)
         mid = int(nb_joueurs/2)
         # 1er tour : tri par classement
         if len(self.tours) == 1:
-            # REINITIALISATION des paires ?
+            # REINITIALISATION des paires
+            del self.paires
             # tri des joueurs par classement
             self.joueurs.sort(key=lambda x: x.classement, reverse=False)
             print("liste joueurs par classement:")
             print(self.joueurs)
+            # définition des paires
             for paire in map(lambda x, y: [x, y], self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
-                paires.append(paire)
+                self.paires.append(paire)
         # tours suivants : tri par points et par classement si égalité de points
         else:
+            pass
+            """
             self.joueurs.sort(key=lambda x: x.classement, reverse=False)
             self.joueurs.sort(key=lambda x: x.points, reverse=True)
             print("liste joueurs par points:")
             print(self.joueurs)
             for paire in map(lambda x, y: [x, y], self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
                 # vérifier que la combinaison n'a pas déjà été joué
-                if paire not in paires:  # matchs déjà joués self.tours.matchs
-                    paires.append(paire)
+                if paire not in self.paires :  # matchs déjà joués self.tours.matchs
+                    self.paires.append(paire)
                     print(paire)
                     # créer le match
                     newmatch = "m" + str(tour.idtour) + str(paire[0]) + str(paire[1])
                     newmatch = Match(self.idtournoi, tour, paire[0], paire[1])
-                    ctr.db.insert(newmatch)
+                    db.insert(newmatch)
                     # ajouter le match au tour
                     tour.addMatch(newmatch)
-                    ctr.db.update(tour.matchs) # affiner : maj uniquement la liste des matchs
+                    db.update(tour.matchs) # affiner : maj uniquement la liste des matchs
 
                 else:  # si paire déjà joué, second joueur = joueur suivant
-                    """ paire[1]=next(paire)[1]
+                    paire[1]=next(paire)[1]
                     print(paire)
-                    paires.append(paire) """
+                    paires.append(paire) 
                     pass
+            """
         print(paires)
 
 
@@ -95,7 +101,7 @@ class Joueur:
         self.sexe = sexe
         self.classement = int(classement)    # entier
         self.points = int(points)    # nb points
-        print(self.nom + " " + self.prenom + " crée.")
+        print(self.nom + " " + self.prenom + " crée. Référence: " + self.nom[0:3]+self.prenom[0:3])
 
     def __str__(self):
         return f"{self.nom} {self.prenom}"
@@ -126,10 +132,10 @@ class Joueur:
 class Tour:
     idtour_counter = itertools.count(1)
 
-    def __init__(self, tournoi, nom):
-        self.idtournoi = tournoi.idtournoi
+    def __init__(self, idtournoi, nomTOUR):
+        self.idtournoi = idtournoi
         self.idtour = str(self.idtournoi) + str(next(self.idtour_counter))
-        self.nom = nom
+        self.nom = nomTOUR
         self.dateHeureDebut = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         self.dateHeureFin = ""
         self.etat = "en cours"
