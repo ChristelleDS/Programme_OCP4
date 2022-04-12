@@ -1,1 +1,0 @@
-{"TOURNOI'>": {"1": {"idtournoi": 1, "nom": "TRN1", "lieu": "PARIS", "date_debut": "12/04/2022", "date_fin": "", "tours": [], "joueurs": [], "timecontrol": "blitz", "description": "descr", "nbtours": 4}}, "JOUEUR'>": {"1": {"idjoueur": 1, "nom": "TEST", "prenom": "coco", "date_naissance": "04/04/1981", "sexe": "H", "classement": 5, "points": 0}}}

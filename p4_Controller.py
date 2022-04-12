@@ -2,11 +2,13 @@ from p4_model import Tournoi, Tour, Joueur, Match
 from p4_view import Database
 
 
-tournoi_encours = db.query_1(tournoi,fin,'')
-print("Tournoi en cours : " + tournoi_encours)
+db = Database("db_echecs")
 
-tour_encours = db.query_1(tournoi,fin,'')
-print("Tour en cours : " + tour_encours)
+#tournoi_encours = db.query_1(tournoi,fin,'')
+#print("Tournoi en cours : " + tournoi_encours)
+
+#tour_encours = db.query_1(tournoi,fin,'')
+#print("Tour en cours : " + tour_encours)
 
 class Menu:
     def creer_tournoi():
@@ -17,7 +19,7 @@ class Menu:
         description = input('Description?')
         t = nom
         t = Tournoi(nom, lieu, debut, timecontrol, description)
-        ctr.db.insert(t)
+        db.insert(t)
         print("sauvegardé en base de données")
 
     def creer_joueur():
@@ -26,24 +28,22 @@ class Menu:
         prenom = input("Prénom du joueur:")
         naissance = input("Date de naissance:")
         sexe = input("Homme (H) ou Femme (F):")
-        classement = input("Classement général (0 par défaut):")
+        classement = int(input("Classement général (0 par défaut, veuillez saisir un nombre entier):"))
         newjoueur = Joueur(nom, prenom, naissance, sexe, int(classement))
-        ctr.db.insert(newjoueur)
+        db.insert(newjoueur)
 
     def inscrire_joueur():
         joueur = input('Identifiant du joueur:')
         tournoi_encours.addJoueur(joueur)
-        ctr.db.update(tournoi_encours)
+        db.update(tournoi_encours)
 
     def demarrer_tour():
         # créer prochain tour
-        newtour = nomtour # a definir
+        newtour = "Round" + str(int(tour_encours[:1]) + 1) # a definir
         newtour = Tour(tournoi_encours,newtour)
-        ctr.db.insert(newtour)
-        # générer les paires (genererPaires)
-        tournoi_encours.genererPaires()
-        # afficher les paires et match
-        pass
+        db.insert(newtour)
+        #tournoi_encours.genererPaires()
+        # afficher les matchs a jouer
 
     def entrer_resultats_tour():
         tour = tour_encours
@@ -52,28 +52,26 @@ class Menu:
         for m in tour.matchs:
             m.saveScore()
         # cloturer le tour (cloturerTour)
-        tour.cloturerTour
+        tour.cloturerTour()
         # ajouter le tour sur l'instance tournoi (addTour)
         tournoi_encours.addTour(tour)
 
     def maj_classement():
-        joueur = input("Identifiant du joueur à mettre à jour : ")
-        newClassement = input("Nouveau classement du joueur: ")
-        joueur.maj_classement(newClassement)
+        Joueur = input("Identifiant du joueur à mettre à jour : ")
+        Joueur.majClassement(input("Nouveau classement du joueur: "))
 
 
 class Controller:
     def __init__(self):
         self.ui = Menu()
-        # self.queries = Query()
-        db_name = "db"
-        self.db = Database(db_name)
+        # self.edito = Edito()
+        self.queries = Query()
 
 
 ctr = Controller()
 Menu.creer_tournoi()
 Menu.creer_joueur()
-ctr.db.get_all("TOURNOI")
+# Menu.maj_classement()
 # Q1 = ctr.db.query_1("TOURNOI","fin",'')
 # print(Q1)
 

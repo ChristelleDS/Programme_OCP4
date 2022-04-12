@@ -1,0 +1,1 @@
+{"TOURNOI": {"1": {"idtournoi": 1, "nom": "t1", "lieu": "ville", "date_debut": "12/04/2022", "date_fin": "", "tours": [], "joueurs": [], "timecontrol": "bullzt", "description": "daojga", "nbtours": 4}}, "JOUEUR": {"1": {"idjoueur": 1, "nom": "JOUEUR", "prenom": "UN", "date_naissance": "04/08/1984", "sexe": "H", "classement": 4, "points": 0}}}

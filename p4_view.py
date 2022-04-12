@@ -8,15 +8,15 @@ class Database:
         self.db.table(table_.upper()).truncate()
 
     def insert(self, objet_):
-        table_ = str(type(objet_)).upper().split(".")[1]
+        table_ = str(type(objet_)).upper().split(".")[1][:-2]
         self.db.table(table_).insert(objet_.serialize())
 
     def upsert(self, objet_):
-        table_ = str(type(objet_)).upper().split(".")[1]
+        table_ = str(type(objet_)).upper().split(".")[1][:-2]
         self.db.table(table_).upsert(objet_.serialize())
 
     def update(self, objet_):
-        table_ = str(type(objet_)).upper().split(".")[1]
+        table_ = str(type(objet_)).upper().split(".")[1][:-2]
         self.db.table(table_).update(objet_.serialize())
 
     def get_all(self, table_):
