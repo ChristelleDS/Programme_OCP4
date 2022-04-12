@@ -54,12 +54,14 @@ class Controller:
     def __init__(self):
         self.ui = Menu()
         self.queries = Query()
-        db_name = "db_echecs"
+        db_name = "db"
         self.db = Database(db_name)
 
 
 controller = Controller()
 Menu.creer_tournoi()
-Menu.creer_joueur()
+# Menu.creer_joueur()
+#tournoi_courant = controller.db.search(TOURNOI.fin == ''))
+#print(tournoi_courant)
 # Menu.inscrire_joueur()
 # controller.ui.inscrire_joueur(TEST)

@@ -7,26 +7,23 @@ class Database:
     def __init__(self, db_name):
         self.db = TinyDB(str(db_name) + '.json')
 
-    def create(self, table_):
-        self.db.table(table_.capitalize())
-
     def truncate(self, table_):
-        self.db.table(table_.capitalize()).truncate()
+        self.db.table(table_.upper()).truncate()
 
     def insert(self, objet_):
-        table_ = str(type(objet_)).capitalize()
+        table_ = str(type(objet_)).upper().split(".")[1]
         self.db.table(table_).insert(objet_.serialize())
 
     def upsert(self, objet_):
-        table_ = str(type(objet_)).capitalize()
+        table_ = str(type(objet_)).upper().split(".")[1]
         self.db.table(table_).upsert(objet_.serialize())
 
     def update(self, objet_):
-        table_ = str(type(objet_)).capitalize()
+        table_ = str(type(objet_)).upper().split(".")[1]
         self.db.table(table_).update(objet_.serialize())
 
     def get_all(self, table_):
-        return self.db.table(table_.capitalize()).all()
+        return self.db.table(table_.upper()).all()
 
 
 class Tournoi:
@@ -71,11 +68,12 @@ class Tournoi:
                 }
 
     def genererPaires(self):
-        paires = []
+        paires = []  # réinitialisation en dehors de la classe ?
         nb_joueurs = len(self.joueurs)
         mid = int(nb_joueurs/2)
         # 1er tour : tri par classement
         if len(self.tours) == 1:
+            # REINITIALISATION des paires ?
             # tri des joueurs par classement
             self.joueurs.sort(key=lambda x: x.classement, reverse=False)
             print("liste joueurs par classement:")
