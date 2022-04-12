@@ -45,6 +45,19 @@ class Tournoi:
                 'nbtours': self.nbtours
                 }
 
+    def unserialized(serialized_tournoi):
+        idtournoi = serialized_tournoi["idtournoi"]
+        nom = serialized_tournoi["nom"]
+        lieu = serialized_tournoi["lieu"]
+        date_debut = serialized_tournoi["date_debut"]
+        date_fin = serialized_tournoi["date_fin"]
+        tours = serialized_tournoi["tours"]
+        joueurs = serialized_tournoi["joueurs"]
+        timecontrol = serialized_tournoi["timecontrol"]
+        description = serialized_tournoi["description"]
+        nbtours = serialized_tournoi["nbtours"]
+        return Joueur(idtournoi, nom, lieu, date_debut, date_fin, tours, joueurs, timecontrol, description, nbtours)
+
     def genererPaires(self,tour):
           # réinitialisation en dehors de la classe ?
         nb_joueurs = len(self.joueurs)
@@ -87,7 +100,7 @@ class Tournoi:
                     paires.append(paire) 
                     pass
             """
-        print(paires)
+        print(self.paires)
 
 
 class Joueur:
@@ -119,6 +132,16 @@ class Joueur:
                 'classement': self.classement,
                 'points': self.points,
                 }
+
+    def unserialized(serialized_joueur):
+        idjoueur = serialized_joueur["idjoueur"]
+        nom = serialized_joueur["nom"]
+        prenom = serialized_joueur["prenom"]
+        date_naissance = serialized_joueur["Date_naissance"]
+        sexe = serialized_joueur["sexe"]
+        classement = serialized_joueur["classement"]
+        points = serialized_joueur["points"]
+        return Joueur(idjoueur, nom, prenom, date_naissance, sexe, classement, points)
 
     def majClassement(self, newclassement):
         self.classement = newclassement
