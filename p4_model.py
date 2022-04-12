@@ -3,29 +3,6 @@ import itertools     # pip install itertools?
 from tinydb import TinyDB, Query, where         # pip install tinydb
 
 
-class Database:
-    def __init__(self, db_name):
-        self.db = TinyDB(str(db_name) + '.json')
-
-    def truncate(self, table_):
-        self.db.table(table_.upper()).truncate()
-
-    def insert(self, objet_):
-        table_ = str(type(objet_)).upper().split(".")[1]
-        self.db.table(table_).insert(objet_.serialize())
-
-    def upsert(self, objet_):
-        table_ = str(type(objet_)).upper().split(".")[1]
-        self.db.table(table_).upsert(objet_.serialize())
-
-    def update(self, objet_):
-        table_ = str(type(objet_)).upper().split(".")[1]
-        self.db.table(table_).update(objet_.serialize())
-
-    def get_all(self, table_):
-        return self.db.table(table_.upper()).all()
-
-
 class Tournoi:
     idtournoi_counter = itertools.count(1)
 
@@ -67,7 +44,7 @@ class Tournoi:
                 'nbtours': self.nbtours
                 }
 
-    def genererPaires(self):
+    def genererPaires(self,tour):
         paires = []  # réinitialisation en dehors de la classe ?
         nb_joueurs = len(self.joueurs)
         mid = int(nb_joueurs/2)
@@ -91,6 +68,14 @@ class Tournoi:
                 if paire not in paires:  # matchs déjà joués self.tours.matchs
                     paires.append(paire)
                     print(paire)
+                    # créer le match
+                    newmatch = "m" + str(tour.idtour) + str(paire[0]) + str(paire[1])
+                    newmatch = Match(self.idtournoi, tour, paire[0], paire[1])
+                    ctr.db.insert(newmatch)
+                    # ajouter le match au tour
+                    tour.addMatch(newmatch)
+                    ctr.db.update(tour.matchs) # affiner : maj uniquement la liste des matchs
+
                 else:  # si paire déjà joué, second joueur = joueur suivant
                     """ paire[1]=next(paire)[1]
                     print(paire)
@@ -172,8 +157,8 @@ class Tour:
 class Match:
     idmatch_counter = itertools.count(1)
 
-    def __init__(self, tournoi, tour, joueur1, joueur2, score1=0, score2=0):
-        self.idtournoi = tournoi.idtournoi
+    def __init__(self, idtournoi, tour, joueur1, joueur2, score1=0, score2=0):
+        self.idtournoi = idtournoi
         self.idtour = tour.idtour
         self.idmatch = str(self.idtournoi) + str(self.idtour) + str(next(self.idmatch_counter))
         self.joueur1 = joueur1
