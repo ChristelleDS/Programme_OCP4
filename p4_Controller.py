@@ -3,11 +3,9 @@ from p4_view import Database
 
 
 db = Database("db_echecs")
-tournoi_encours = db.query_1('TOURNOI', 'date_fin', '')[0]['nom']
-tour_encours = db.query_1('TOUR', 'etat', 'en cours')[0]['nom']
-
 
 class Menu:
+    @staticmethod
     def creer_tournoi():
         nom = input('Nom du tournoi (un seul mot):')
         lieu = input('Lieu du tournoi?')
@@ -19,21 +17,27 @@ class Menu:
         db.insert(t)
         print("sauvegardé en base de données")
 
-    def creer_joueur():
-        nom = input('Nom du joueur:')
-        prenom = input('Prénom du joueur:')
-        newjoueur = nom[0:3] + prenom[0:3]
-        naissance = input('Date de naissance:')
-        sexe = input('Homme (H) ou Femme (F):')
-        classement = int(input('Classement général (0 par défaut, veuillez saisir un nombre entier):'))
-        newjoueur = Joueur(nom, prenom, naissance, sexe, int(classement))
-        db.insert(newjoueur)
-
+    @staticmethod
     def inscrire_joueur():
-        joueur = input('Référence du joueur:')
-        tournoi_encours.addJoueur(joueur)
-        db.update(tournoi_encours)
+        tournoi_encours = db.query_1('TOURNOI', 'date_fin', '')[0]['nom']  # A VARIABILISER? A QUEL NIVEAU?
+        j_nom = input('Nom du joueur à inscrire:')
+        j_prenom = input('Prenom du joueur: ')
+        object = db.query_2('JOUEUR', 'nom', j_nom, 'prenom', j_prenom)
+        if object :
+            tournoi_encours.addJoueur(object)
+            db.update(tournoi_encours)
+            print('Joueur inscrit au tournoi.')
+        else :
+            j_naissance = input('Date de naissance:')
+            j_sexe = input('Homme (H) ou Femme (F):')
+            j_classement = int(input('Classement général (0 par défaut, veuillez saisir un nombre entier):'))
+            newjoueur = Joueur(j_nom, j_prenom, j_naissance, j_sexe, int(j_classement))
+            db.insert(newjoueur)
+            tournoi_encours.addJoueur(newjoueur)
+            db.update(tournoi_encours)
+            print('Nouveau joueur crée et inscrit au tournoi')
 
+    @staticmethod
     def demarrer_tour():
         # créer prochain tour
         newtour = 'Round1' # + str(int(tour_encours[:1]) + 1) # a definir
@@ -42,19 +46,22 @@ class Menu:
         #tournoi_encours.genererPaires()
         # afficher les matchs a jouer
 
+    @staticmethod
     def entrer_resultats_tour():
-        tour = tour_encours
+        tour_encours = db.query_1('TOUR', 'etat', 'en cours')[0]['nom']
         # pour chaque match:
             # sauvegarde les scores du match (saveScore)
-        for m in tour.matchs:
+        for m in tour_encours.matchs:
             m.saveScore()
         # cloturer le tour (cloturerTour)
-        tour.cloturerTour()
+        tour_encours.cloturerTour()
         # ajouter le tour sur l'instance tournoi (addTour)
-        tournoi_encours.addTour(tour)
+        tournoi_encours = db.query_1('TOURNOI', 'date_fin', '')[0]['nom']
+        tournoi_encours.addTour(tour_encours)
 
+    @staticmethod
     def maj_classement():
-        Joueur = input('Identifiant du joueur à mettre à jour : ')
+        Joueur = str(input('Identifiant du joueur à mettre à jour : '))
         Joueur.majClassement(input('Nouveau classement du joueur: '))
 
 
@@ -65,20 +72,10 @@ class Controller:
         # self.queries = Query()
 
 
+
 ctr = Controller()
 Menu.creer_tournoi()
-Menu.creer_joueur()
-Menu.creer_joueur()
-Menu.creer_joueur()
-Menu.creer_joueur()
-Menu.creer_joueur()
-Menu.creer_joueur()
-Menu.creer_joueur()
-Menu.creer_joueur()
+Menu.inscrire_joueur()
 Menu.demarrer_tour()
-# Menu.maj_classement()
-# Q1 = ctr.db.query_1("TOURNOI","fin",'')
-# print(Q1)
 
-# Menu.inscrire_joueur()
-# controller.ui.inscrire_joueur(TEST)
+

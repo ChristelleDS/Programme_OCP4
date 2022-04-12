@@ -25,3 +25,7 @@ class Database:
     def query_1(self, table_, var_, val_):
         q = Query()
         return self.db.table(table_.upper()).search(q[var_] == val_)
+
+    def query_2(self, table_, var_1, val_1, var_2, val_2):
+        q = Query()
+        return self.db.table(table_.upper()).search((q[var_1] == val_1) & (q[var_2] == val_2))

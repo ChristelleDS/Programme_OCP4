@@ -1,0 +1,1 @@
+{"TOURNOI": {"1": {"idtournoi": 1, "nom": "trn1", "lieu": "paris", "date_debut": "05/06/2022", "date_fin": "", "tours": [], "joueurs": [], "timecontrol": "coup rapide", "description": "dzacafa", "nbtours": 4}}, "JOUEUR": {"1": {"idjoueur": 1, "nom": "JOUEUR", "prenom": "UN", "date_naissance": "05/08/1985", "sexe": "H", "classement": 1, "points": 0}}}
