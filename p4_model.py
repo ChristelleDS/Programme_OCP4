@@ -34,9 +34,10 @@ class Tournoi:
         print(self.nom + " cloturé.")
 
     def __getitem__(self, items):
-        print (type(items), items)
+        print(type(items), items)
 
     def serialize(self):
+        # return json.dumps(self.__dict__, lambda o: o.__dict__, indent=4)
         return { 'idtournoi': self.idtournoi, 'nom': self.nom, 'lieu': self.lieu,
                 'date_debut': self.debut, 'date_fin': self.fin, 'tours': self.tours,
                 'joueurs': self.joueurs, 'timecontrol': self.timecontrol,
@@ -210,67 +211,3 @@ class Match:
             self.joueur2.majPoints(1)
             print(str(self.joueur2) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur2.points))
 
-
-"""    
-# Instancier un tournoi
-tournoiParis = Tournoi("TournoiParis", "Paris", "13/04/2022", "Blitz", "description")
-
-# Instancier des joueurs
-roidesEchecs = Joueur("Echecs", "Roi", "01/08/1986", "Homme", 1)
-db.insert(roidesEchecs)
-alex = Joueur("Test", "Alex", "01/12/1995", "Homme", 2)
-db.insert(alex)
-julie = Joueur("Test", "Julie", "15/08/1975", "Femme", 3)
-db.insert(julie)
-henri = Joueur("Test", "Henri", "25/08/1965", "Homme", 4)
-db.insert(henri)
-john = Joueur("Do", "John", "25/08/1985", "Homme", 5)
-db.insert(john)
-victor = Joueur("Dodo", "Victor", "14/07/1968", "Homme", 6)
-db.insert(victor)
-junior = Joueur("Dupont", "Junior", "04/04/1998", "Homme", 7)
-db.insert(junior)
-alice = Joueur("Vendi", "Alice", "07/10/1995", "Femme", 8)
-db.insert(alice)
-# Ajouter joueurs au tournoi
-tournoiParis.addJoueur(victor)
-tournoiParis.addJoueur(alice)
-tournoiParis.addJoueur(henri)
-tournoiParis.addJoueur(john)
-tournoiParis.addJoueur(alex)
-tournoiParis.addJoueur(roidesEchecs)
-tournoiParis.addJoueur(junior)
-tournoiParis.addJoueur(julie)
-# Instancier un tour
-round1 = Tour(1,"Round1")
-round2 = Tour(1,"Round2")
-# Ajouter tour au tournoi
-tournoiParis.addTour(round1)
-tournoiParis.addTour(round2)
-# Instancier un match
-match1 = Match(11, 8, 6)
-db.insert(match1)
-match2 = Match(11, 7, 2)
-db.insert(match2)
-match3 = Match(11, 4, 5)
-db.insert(match3)
-match4 = Match(11, 1, 3)
-db.insert(match4)
-# Ajouter le match au 1er tour
-round1.addMatch(match1)
-round1.addMatch(match2)
-round1.addMatch(match3)
-round1.addMatch(match4)
-db.insert(round1)
-db.insert(round2)
-db.insert(tournoiParis)
-
-match1.saveScore()
-match2.saveScore()
-match3.saveScore()
-match4.saveScore()
-
-print(round1.matchs)
-
-tournoiParis.genererPaires()
-"""

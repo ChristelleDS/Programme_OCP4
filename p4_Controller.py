@@ -1,6 +1,6 @@
 from p4_model import Tournoi, Tour, Joueur, Match
 from p4_view import Database
-
+from pprintpp import pprint as pp
 
 db = Database("db_echecs")
 
@@ -60,8 +60,10 @@ class Menu:
         # sauvegarde les scores du match (saveScore)
         for match in tour_encours.matchs:
             match.saveScore()
-        # cloturer le tour (cloturerTour)
+            db.update(match)
+        # cloturer le tour (cloturerTour) et maj
         tour_encours.cloturerTour()
+        db.update(tour_encours)
         # ajouter le tour sur l'instance tournoi (addTour)
         tournoi_encours = db.query_1('TOURNOI', 'date_fin', '')[0]['nom']
         tournoi_encours.addTour(tour_encours)
@@ -72,6 +74,10 @@ class Menu:
         object.joueur.majClassement(input('Nouveau classement du joueur: '))
         db.update(object.joueur)
 
+    @staticmethod
+    def terminer_tournoi():
+        tournoi_encours.cloturerTournoi()
+        db.update(tournoi_encours)
 
 class Controller:
     def __init__(self):
@@ -82,6 +88,6 @@ class Controller:
 
 
 ctr = Controller()
-Menu.creer_tournoi()
+# Menu.creer_tournoi()
 # Menu.inscrire_joueur()
 # Menu.demarrer_tour()
