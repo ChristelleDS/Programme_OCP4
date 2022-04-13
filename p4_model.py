@@ -1,6 +1,7 @@
 import datetime      # pip install datetime?
 import itertools     # pip install itertools?
-from tinydb import TinyDB, Query, where         # pip install tinydb
+import json
+import pprint
 
 
 class Tournoi:
@@ -21,28 +22,25 @@ class Tournoi:
         print(self.nom + " crée.")
 
     def addJoueur(self, joueur):
-        self.joueurs.append(joueur)
+        self.joueurs.append(joueur.idjoueur)
         return str(joueur) + " inscrit au tournoi."
 
     def addTour(self, tour):
-        self.tours.append(tour)
+        self.tours.append(tour.idtour)
         print(tour.nom + " ajouté au " + self.nom)
 
     def cloturerTournoi(self):
         self.fin = datetime.datetime.today().strftime('%Y-%m-%d')
         print(self.nom + " cloturé.")
 
+    def __getitem__(self, items):
+        print (type(items), items)
+
     def serialize(self):
-        return { 'idtournoi': self.idtournoi,
-                'nom': self.nom,
-                'lieu': self.lieu,
-                'date_debut': self.debut,
-                'date_fin': self.fin,
-                'tours': self.tours,
-                'joueurs': self.joueurs,
-                'timecontrol': self.timecontrol,
-                'description': self.description,
-                'nbtours': self.nbtours
+        return { 'idtournoi': self.idtournoi, 'nom': self.nom, 'lieu': self.lieu,
+                'date_debut': self.debut, 'date_fin': self.fin, 'tours': self.tours,
+                'joueurs': self.joueurs, 'timecontrol': self.timecontrol,
+                'description': self.description, 'nbtours': self.nbtours
                 }
 
     def unserialized(serialized_tournoi):
@@ -56,10 +54,10 @@ class Tournoi:
         timecontrol = serialized_tournoi["timecontrol"]
         description = serialized_tournoi["description"]
         nbtours = serialized_tournoi["nbtours"]
-        return Joueur(idtournoi, nom, lieu, date_debut, date_fin, tours, joueurs, timecontrol, description, nbtours)
+        return Tournoi(idtournoi, nom, lieu, date_debut, date_fin, tours, joueurs, timecontrol, description, nbtours)
 
-    def genererPaires(self,tour):
-          # réinitialisation en dehors de la classe ?
+    def genererPaires(self, tour):
+        # réinitialisation en dehors de la classe ?
         nb_joueurs = len(self.joueurs)
         mid = int(nb_joueurs/2)
         # 1er tour : tri par classement
@@ -106,11 +104,11 @@ class Tournoi:
 class Joueur:
     idjoueur_counter = itertools.count(1)
 
-    def __init__(self, nom, prenom, naissance, sexe, classement=0, points=0):
+    def __init__(self, nom, prenom, date_naissance, sexe, classement=0, points=0):
         self.idjoueur = next(self.idjoueur_counter)
         self.nom = str(nom)
         self.prenom = str(prenom)
-        self.date_naissance = naissance
+        self.date_naissance = date_naissance
         self.sexe = sexe
         self.classement = int(classement)    # entier
         self.points = int(points)    # nb points
@@ -123,6 +121,9 @@ class Joueur:
         return f"{self.nom} {self.prenom}, classement : {self.classement}, points : {self.points}"
         # return f"{self.idjoueur}"
 
+    def __getitem__(self, items):
+        print(type(items), items)
+
     def serialize(self):
         return {'idjoueur': self.idjoueur,
                 'nom': self.nom,
@@ -134,14 +135,7 @@ class Joueur:
                 }
 
     def unserialized(serialized_joueur):
-        idjoueur = serialized_joueur["idjoueur"]
-        nom = serialized_joueur["nom"]
-        prenom = serialized_joueur["prenom"]
-        date_naissance = serialized_joueur["Date_naissance"]
-        sexe = serialized_joueur["sexe"]
-        classement = serialized_joueur["classement"]
-        points = serialized_joueur["points"]
-        return Joueur(idjoueur, nom, prenom, date_naissance, sexe, classement, points)
+        return Joueur(**json.loads(serialized_joueur))
 
     def majClassement(self, newclassement):
         self.classement = newclassement
@@ -155,20 +149,33 @@ class Joueur:
 class Tour:
     idtour_counter = itertools.count(1)
 
-    def __init__(self, idtournoi, nomTOUR):
+    def __init__(self, idtournoi, nom_tour):
         self.idtournoi = idtournoi
         self.idtour = str(self.idtournoi) + str(next(self.idtour_counter))
-        self.nom = nomTOUR
-        self.dateHeureDebut = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.dateHeureFin = ""
+        self.nom = nom_tour
+        self.date_heure_debut = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.date_heure_fin = ""
         self.etat = "en cours"
         self.matchs = []
         print(self.nom + " crée. ID: " + str(self.idtour))
 
+    def __getitem__(self, items):
+        print(type(items), items)
+
     def serialize(self):
         return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'nom': self.nom,
-                'dateHeureDebut': self.dateHeureDebut, 'dateHeureFin': self.dateHeureFin,
+                'date_heure_debut': self.date_heure_debut, 'date_heure_fin': self.date_heure_fin,
                 'etat': self.etat, 'matchs': self.matchs}
+
+    def unserialized(serialized_tour):
+        idtournoi = serialized_tour["idtournoi"]
+        idtour = serialized_tour["idtour"]
+        nom = serialized_tour["nom"]
+        date_heure_debut = serialized_tour["date_heure_debut"]
+        date_heure_fin = serialized_tour["date_heure_fin"]
+        etat = serialized_tour["etat"]
+        matchs = serialized_tour["matchs"]
+        return Tour(idtournoi, idtour, nom, date_heure_debut, date_heure_fin, etat, matchs)
 
     def addMatch(self, match):
         result_j1 = [match.joueur1, match.score1]
@@ -179,16 +186,16 @@ class Tour:
 
     def cloturerTour(self):
         self.etat = "Terminé"
-        self.dateHeureFin = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print(self.nom + " cloturé à " + self.dateHeureFin)
+        self.date_heure_fin = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print(self.nom + " cloturé à " + self.date_heure_fin)
 
 
 class Match:
     idmatch_counter = itertools.count(1)
 
-    def __init__(self, idtournoi, tour, joueur1, joueur2, score1=0, score2=0):
-        self.idtournoi = idtournoi
-        self.idtour = tour.idtour
+    def __init__(self, idtour, joueur1, joueur2, score1=0, score2=0):
+        self.idtournoi = str(idtour)[0:1]
+        self.idtour = idtour
         self.idmatch = str(self.idtournoi) + str(self.idtour) + str(next(self.idmatch_counter))
         self.joueur1 = joueur1
         self.joueur2 = joueur2
@@ -200,6 +207,16 @@ class Match:
         return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'idmatch': self.idmatch,
                 'joueur1': self.joueur1, 'joueur2': self.joueur2,
                 'score1': self.score1, 'score2': self.score2}
+
+    def unserialized(serialized_match):
+        idtournoi = serialized_match["idtournoi"]
+        idtour = serialized_match["idtour"]
+        idmatch = serialized_match["idmatch"]
+        joueur1 = serialized_match["joueur1"]
+        joueur2 = serialized_match["joueur2"]
+        score1 = serialized_match["score1"]
+        score2 = serialized_match["score2"]
+        return Match(idtournoi, idtour, idmatch, joueur1, joueur2, score1, score2)
 
     def saveScore(self):
         self.score1 = input("Score de " + str(self.joueur1) + " ?")
@@ -220,16 +237,25 @@ class Match:
 
 """    
 # Instancier un tournoi
-tournoiParis = Tournoi("TournoiParis", "Paris", "10/03/2022", "Blitz", "description")
+tournoiParis = Tournoi("TournoiParis", "Paris", "13/04/2022", "Blitz", "description")
+
 # Instancier des joueurs
 roidesEchecs = Joueur("Echecs", "Roi", "01/08/1986", "Homme", 1)
+db.insert(roidesEchecs)
 alex = Joueur("Test", "Alex", "01/12/1995", "Homme", 2)
+db.insert(alex)
 julie = Joueur("Test", "Julie", "15/08/1975", "Femme", 3)
+db.insert(julie)
 henri = Joueur("Test", "Henri", "25/08/1965", "Homme", 4)
+db.insert(henri)
 john = Joueur("Do", "John", "25/08/1985", "Homme", 5)
+db.insert(john)
 victor = Joueur("Dodo", "Victor", "14/07/1968", "Homme", 6)
+db.insert(victor)
 junior = Joueur("Dupont", "Junior", "04/04/1998", "Homme", 7)
+db.insert(junior)
 alice = Joueur("Vendi", "Alice", "07/10/1995", "Femme", 8)
+db.insert(alice)
 # Ajouter joueurs au tournoi
 tournoiParis.addJoueur(victor)
 tournoiParis.addJoueur(alice)
@@ -240,21 +266,28 @@ tournoiParis.addJoueur(roidesEchecs)
 tournoiParis.addJoueur(junior)
 tournoiParis.addJoueur(julie)
 # Instancier un tour
-round1 = Tour(1,"Round 1")
-round2 = Tour(1,"Round 2")
+round1 = Tour(1,"Round1")
+round2 = Tour(1,"Round2")
 # Ajouter tour au tournoi
 tournoiParis.addTour(round1)
-#tournoiParis.addTour(round2)
+tournoiParis.addTour(round2)
 # Instancier un match
-match1 = Match(1, 11, alice, victor)
-match2 = Match(1, 12, junior, alex)
-match3 = Match(1, 13, henri, john)
-match4 = Match(1, 14, roidesEchecs, julie)
+match1 = Match(11, 8, 6)
+db.insert(match1)
+match2 = Match(11, 7, 2)
+db.insert(match2)
+match3 = Match(11, 4, 5)
+db.insert(match3)
+match4 = Match(11, 1, 3)
+db.insert(match4)
 # Ajouter le match au 1er tour
 round1.addMatch(match1)
 round1.addMatch(match2)
 round1.addMatch(match3)
 round1.addMatch(match4)
+db.insert(round1)
+db.insert(round2)
+db.insert(tournoiParis)
 
 match1.saveScore()
 match2.saveScore()

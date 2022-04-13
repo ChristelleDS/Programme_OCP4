@@ -1,4 +1,5 @@
-from tinydb import TinyDB, Query, where
+from tinydb import TinyDB, Query, where   # pip install tinydb
+from pprint import pprint
 
 class Database:
     def __init__(self, db_name):
@@ -20,7 +21,7 @@ class Database:
         self.db.table(table_).update(objet_.serialize())
 
     def get_all(self, table_):
-        return self.db.all()
+        return self.db.table(table_.capitalize()).all()
 
     def query_1(self, table_, var_, val_):
         q = Query()
