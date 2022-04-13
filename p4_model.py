@@ -44,17 +44,7 @@ class Tournoi:
                 }
 
     def unserialized(serialized_tournoi):
-        idtournoi = serialized_tournoi["idtournoi"]
-        nom = serialized_tournoi["nom"]
-        lieu = serialized_tournoi["lieu"]
-        date_debut = serialized_tournoi["date_debut"]
-        date_fin = serialized_tournoi["date_fin"]
-        tours = serialized_tournoi["tours"]
-        joueurs = serialized_tournoi["joueurs"]
-        timecontrol = serialized_tournoi["timecontrol"]
-        description = serialized_tournoi["description"]
-        nbtours = serialized_tournoi["nbtours"]
-        return Tournoi(idtournoi, nom, lieu, date_debut, date_fin, tours, joueurs, timecontrol, description, nbtours)
+        return Tournoi(**json.loads(serialized_tournoi))
 
     def genererPaires(self, tour):
         # réinitialisation en dehors de la classe ?
@@ -168,14 +158,7 @@ class Tour:
                 'etat': self.etat, 'matchs': self.matchs}
 
     def unserialized(serialized_tour):
-        idtournoi = serialized_tour["idtournoi"]
-        idtour = serialized_tour["idtour"]
-        nom = serialized_tour["nom"]
-        date_heure_debut = serialized_tour["date_heure_debut"]
-        date_heure_fin = serialized_tour["date_heure_fin"]
-        etat = serialized_tour["etat"]
-        matchs = serialized_tour["matchs"]
-        return Tour(idtournoi, idtour, nom, date_heure_debut, date_heure_fin, etat, matchs)
+        return Tour(**json.loads(serialized_tour))
 
     def addMatch(self, match):
         result_j1 = [match.joueur1, match.score1]
@@ -209,14 +192,7 @@ class Match:
                 'score1': self.score1, 'score2': self.score2}
 
     def unserialized(serialized_match):
-        idtournoi = serialized_match["idtournoi"]
-        idtour = serialized_match["idtour"]
-        idmatch = serialized_match["idmatch"]
-        joueur1 = serialized_match["joueur1"]
-        joueur2 = serialized_match["joueur2"]
-        score1 = serialized_match["score1"]
-        score2 = serialized_match["score2"]
-        return Match(idtournoi, idtour, idmatch, joueur1, joueur2, score1, score2)
+        return Match(**json.loads(serialized_match))
 
     def saveScore(self):
         self.score1 = input("Score de " + str(self.joueur1) + " ?")
