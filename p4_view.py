@@ -30,3 +30,16 @@ class Database:
     def query_2(self, table_, var_1, val_1, var_2, val_2):
         q = Query()
         return self.db.table(table_.upper()).search((q[var_1] == val_1) & (q[var_2] == val_2))
+
+    def get_list(self, object_):
+        return list(map(lambda x: x["id"], self.get_all(object_)))
+
+    def get_current_tournament(self):
+        return self.query_1('TOURNOI', 'date_fin', '')[0]['nom']
+
+    def get_current_tour(self):
+        return self.query_1('TOUR', 'etat', 'en cours')[0]['nom']
+
+    def get_list_rounds(self):
+            return list(list(i.split(":")) for i in
+                        set(map(lambda x: str(x['idtour']) + ":" + str(x['idtournoi']), self.get_all('MATCH'))))

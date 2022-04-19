@@ -1,11 +1,15 @@
 from p4_model import Tournoi, Tour, Joueur, Match
 from p4_view import Database
 from pprintpp import pprint as pp
+import json
 
 db = Database("db_echecs")
 
 
 class Menu:
+    # tournoi_encours = db.get_current_tournament()
+    # tour_encours = db.get_current_tour()
+
     @staticmethod
     def creer_tournoi():
         nom = input('Nom du tournoi (un seul mot):')
@@ -17,16 +21,12 @@ class Menu:
         else:
             timecontrol = input('Contrôle du temps (bullet, blitz ou coup rapide?): ')
         description = input('Description?')
-        #  t = nom
         t = Tournoi(nom, lieu, debut, timecontrol, description)
         db.insert(t)
         print("sauvegardé en base de données")
 
     @staticmethod
     def inscrire_joueur():
-        tournoi_encours = db.query_1('TOURNOI', 'date_fin', '')[0]['nom']
-        # q_tournoi = db.query_1('TOURNOI', 'date_fin', '')[0]    # ['nom']  A VARIABILISER? A QUEL NIVEAU?
-        # tournoi_encours = q_tournoi.unserialized().nom
         j_nom = input('Nom du joueur à inscrire:')
         j_prenom = input('Prenom du joueur: ')
         q_joueur = db.query_2('JOUEUR', 'nom', j_nom, 'prenom', j_prenom)
@@ -47,6 +47,7 @@ class Menu:
     @staticmethod
     def demarrer_tour():
         # créer prochain tour
+        newtour = "round"+ current_round[:1]+1
         newtour = 'Round1'  # + str(int(tour_encours[:1]) + 1) # a definir
         newtour = Tour(1, 'Round1')
         db.insert(newtour)
@@ -55,24 +56,25 @@ class Menu:
 
     @staticmethod
     def entrer_resultats_tour():
-        tour_encours = db.query_1('TOUR', 'etat', 'en cours')[0]['nom']
         # pour chaque match:
+        current_round ='round1'
         # sauvegarde les scores du match (saveScore)
-        for match in tour_encours.matchs:
+        for match in current_round.matchs:
             match.saveScore()
-            db.update(match)
+            # db.update(match)
         # cloturer le tour (cloturerTour) et maj
-        tour_encours.cloturerTour()
-        db.update(tour_encours)
+        current_round.cloturerTour()
+        db.update(current_round)
         # ajouter le tour sur l'instance tournoi (addTour)
-        tournoi_encours = db.query_1('TOURNOI', 'date_fin', '')[0]['nom']
-        tournoi_encours.addTour(tour_encours)
+        tournoi_encours.addTour(current_round)
 
     @staticmethod
     def maj_classement():
-        object.joueur = input('Identifiant du joueur à mettre à jour : ')
-        object.joueur.majClassement(input('Nouveau classement du joueur: '))
-        db.update(object.joueur)
+        player_lastname = input('Nom du joueur à mettre à jour :')
+        player_firstname = input('Prenom du joueur à mettre à jour :')
+        player = db.query_2('JOUEUR', 'nom', player_lastname, 'prenom', player_firstname)
+        player.majClassement(input('Nouveau classement du joueur: '))
+        db.update(player)
 
     @staticmethod
     def terminer_tournoi():
