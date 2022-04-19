@@ -84,3 +84,12 @@ class Controller:
         db.update(self.tour_encours())
         # ajouter le tour sur l'instance tournoi (addTour)
         self.tournoi_encours().addTour(self.tour_encours())
+
+    def maj_classement(self):
+        player_lastname = input('Nom du joueur à mettre à jour :').upper()
+        player_firstname = input('Prenom du joueur à mettre à jour :').lower()
+        q = db.query_2('JOUEUR', 'nom', player_lastname, 'prenom', player_firstname)[0]
+        player = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
+                        q['points'], q['idjoueur'])
+        player.majClassement(input('Nouveau classement du joueur: '))
+        db.update(player)
