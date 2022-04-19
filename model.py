@@ -1,15 +1,13 @@
 import datetime      # pip install datetime?
-import itertools     # pip install itertools?
+# import itertools     # pip install itertools?
 from tinydb import TinyDB, Query  # pip install tinydb
 
 
 class Tournoi:
-    idtournoi_counter = itertools.count(1)
-    timecontrol_list = ['bullet', 'blitz', 'coup rapide']
     paires = []
 
     def __init__(self, nom, lieu, date_debut, timecontrol, description, tours, joueurs,
-                 idtournoi=next(idtournoi_counter), nbtours=4, date_fin=''):
+                 idtournoi=1, nbtours=4, date_fin=''):
         self.idtournoi = idtournoi
         self.nom = nom
         self.lieu = lieu
@@ -20,7 +18,7 @@ class Tournoi:
         self.timecontrol = timecontrol
         self.description = description
         self.nbtours = int(nbtours)
-        print(self.nom + " crée.")
+        # print(self.nom + " crée.")
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur.idjoueur)
@@ -90,9 +88,8 @@ class Tournoi:
 
 
 class Joueur:
-    idjoueur_counter = itertools.count(1)
 
-    def __init__(self, nom, prenom, date_naissance, sexe, classement=0, points=0, idjoueur=next(idjoueur_counter)):
+    def __init__(self, nom, prenom, date_naissance, sexe, classement=0, points=0, idjoueur=1):
         self.idjoueur = idjoueur
         self.nom = str(nom)
         self.prenom = str(prenom)
@@ -124,10 +121,8 @@ class Joueur:
 
 
 class Tour:
-    idtour_counter = itertools.count(1)
-    next_tour = next(idtour_counter)
 
-    def __init__(self, idtournoi, nom_tour, matchs, idtour=str("T"+str(next_tour)),
+    def __init__(self, idtournoi, nom_tour, matchs, idtour="T1",
                  date_heure_debut=datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
                  date_heure_fin="", etat="en cours"):
         self.idtournoi = idtournoi
@@ -158,10 +153,9 @@ class Tour:
 
 
 class Match:
-    idmatch_counter = itertools.count(1)
 
     def __init__(self, idtour, joueur1, joueur2, score1=0, score2=0,
-                 idmatch=str("M" + str(next(idmatch_counter)))):
+                 idmatch="M1"):
         self.idtour = idtour
         self.idtournoi = str(self.idtour)[0:1]
         self.idmatch = idmatch

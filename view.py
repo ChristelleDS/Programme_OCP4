@@ -1,2 +1,4 @@
 class Menu:
-    pass
+    def methode(self):
+        pass
+

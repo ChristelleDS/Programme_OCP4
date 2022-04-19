@@ -4,12 +4,13 @@ from View import Menu
 
 db = Database("db_echecs")
 timecontrol_list = ['bullet', 'blitz', 'coup rapide']
+paires = []
+
 
 class Controller:
     def __init__(self):
-        self.ui = Menu()
+        self.menu = Menu()
         # self.edito = Edito()
-        # self.queries = Query()
         self.db = db
 
     @staticmethod
@@ -21,10 +22,13 @@ class Controller:
 
     @staticmethod
     def tournoi_encours():
-        q = db.query_1('TOURNOI', 'date_fin', '')[0]
-        tournoi_encours = Tournoi(q['nom'], q['lieu'], q['date_debut'], q['timecontrol'], q['description'], q['tours'],
+        try:
+            q = db.query_1('TOURNOI', 'date_fin', '')[0]
+            tournoi_encours = Tournoi(q['nom'], q['lieu'], q['date_debut'], q['timecontrol'], q['description'], q['tours'],
                                   q['joueurs'], q['idtournoi'], q['nbtours'], q['date_fin'])
-        return tournoi_encours
+            return tournoi_encours
+        except IndexError:
+            return "Aucun tournoi en cours"
 
     @staticmethod
     def tour_encours():
@@ -46,7 +50,11 @@ class Controller:
         description = input('Description?')
         tours = []
         joueurs = []
-        t = Tournoi(nom, lieu, debut, timecontrol, description, tours, joueurs)
+        try:
+            idtournoi = max(list(map(lambda x: x['idtournoi'], db.get_all('tournoi')))) + 1
+        except ValueError:
+            idtournoi = 1
+        t = Tournoi(nom, lieu, debut, timecontrol, description, tours, joueurs, idtournoi)
         matchs = []
         round1 = Tour(t.idtournoi, 'round1', matchs)
         db.insert(round1)
@@ -67,7 +75,11 @@ class Controller:
             j_naissance = input('Date de naissance:')
             j_sexe = input('Homme (H) ou Femme (F):')
             j_classement = int(input('Classement général (0 par défaut, veuillez saisir un nombre entier):'))
-            newjoueur = Joueur(j_nom, j_prenom, j_naissance, j_sexe, int(j_classement))
+            try:
+                j_idjoueur = max(list(map(lambda x: x['idjoueur'], db.get_all('joueur'))))+1
+            except ValueError:
+                j_idjoueur = 1
+            newjoueur = Joueur(j_nom, j_prenom, j_naissance, j_sexe, int(j_classement), 0, j_idjoueur)
             db.insert(newjoueur)
             tournoi.addJoueur(newjoueur)
             db.update(tournoi)
@@ -93,3 +105,15 @@ class Controller:
                         q['points'], q['idjoueur'])
         player.majClassement(input('Nouveau classement du joueur: '))
         db.update(player)
+
+    def terminer_tournoi(self):
+        tournoi = self.tournoi_encours()
+        tournoi.cloturerTournoi()
+        db.update(tournoi)
+
+    def get_all_tournois(self):
+        return list(map(lambda x: str(x['idtournoi']) + " - " + x['nom'], db.get_all('tournoi')))
+
+    def get_all_joueurs(self):
+        players_list = list(map(lambda x: dict(x['idjoueur']) + " - "+ x['nom'] + " classement: " + str(x['classement']), db.get_all('joueur')))
+        return players_list
