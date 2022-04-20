@@ -126,7 +126,7 @@ class Tour:
                  date_heure_debut=datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
                  date_heure_fin="", etat="en cours"):
         self.idtournoi = idtournoi
-        self.idtour = idtour
+        self.idtour = str(idtournoi)+str(idtour)
         self.nom = nom_tour
         self.date_heure_debut = date_heure_debut
         self.date_heure_fin = date_heure_fin
@@ -140,8 +140,8 @@ class Tour:
                 'etat': self.etat, 'matchs': self.matchs}
 
     def addMatch(self, match):
-        result_j1 = [match.joueur1.idjoueur, match.score1]
-        result_j2 = [match.joueur2.idjoueur, match.score2]
+        result_j1 = [match.joueur1, match.score1]
+        result_j2 = [match.joueur2, match.score2]
         match_result = (result_j1, result_j2)
         self.matchs.append(match_result)
         print("Match ajouté au tour.")
@@ -154,10 +154,9 @@ class Tour:
 
 class Match:
 
-    def __init__(self, idtour, joueur1, joueur2, score1=0, score2=0,
-                 idmatch="M1"):
+    def __init__(self, idtour, joueur1, joueur2, score1=0, score2=0, idmatch="M1"):
         self.idtour = idtour
-        self.idtournoi = str(self.idtour)[0:1]
+        self.idtournoi = str(self.idtour)[0:2]
         self.idmatch = idmatch
         self.joueur1 = joueur1
         self.joueur2 = joueur2

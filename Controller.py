@@ -85,16 +85,27 @@ class Controller:
             db.update(tournoi)
             print('Nouveau joueur crée et inscrit au tournoi')
 
+    def demarrer_tour(self):
+        tour_encours = self.tour_encours()
+        # génération des paires à inclure ici
+        paire = [[1,3],[2,4]]
+        for p in paire:
+            match = Match(tour_encours.idtour, p[0], p[1])
+            db.insert(match)
+            tour_encours.addMatch(match)
+            db.update(tour_encours)
+
     def entrer_resultats_tour(self):
+        tour_encours = self.tour_encours()
         # pour chaque match:
         # sauvegarde les scores du match (saveScore)
-        for match in self.tour_encours().matchs:
+        for match in tour_encours.matchs:
             match.saveScore()
             # db.update(match)
         # cloturer le tour (cloturerTour) et maj
-        self.tour_encours().cloturerTour()
-        db.update(self.tour_encours())
-        # ajouter le tour sur l'instance tournoi (addTour)
+        tour_encours.cloturerTour()
+        db.update(tour_encours)
+        # Créer le tour suivant
         self.tournoi_encours().addTour(self.tour_encours())
 
     def maj_classement(self):
@@ -104,8 +115,8 @@ class Controller:
         player = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
                         q['points'], q['idjoueur'])
         newclassement = int(input('Nouveau classement du joueur: '))
-        # player.majClassement(newclassement)
-        db.update('classement', newclassement, q)
+        player.majClassement(newclassement)
+        # db.update(player)
 
     def terminer_tournoi(self):
         tournoi = self.tournoi_encours()
@@ -124,7 +135,7 @@ class Controller:
     def get_all_joueurs(self):
         players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " classement: "
                                           + str(x['classement']), db.get_all('joueur')))
-        players_list.sort(reverse=False)
+        players_list.sort(reverse=False)  #tri par ordre alphabetique
         return players_list
 
     def query_double(self):
