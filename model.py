@@ -90,7 +90,7 @@ class Tournoi:
 class Joueur:
 
     def __init__(self, nom, prenom, date_naissance, sexe, classement=0, points=0, idjoueur=1):
-        self.idjoueur = idjoueur
+        self.idjoueur = int(idjoueur)
         self.nom = str(nom)
         self.prenom = str(prenom)
         self.date_naissance = date_naissance
@@ -201,6 +201,8 @@ class Database:
     def update(self, objet_):
         table_ = str(type(objet_)).upper().split(".")[1][:-2]
         self.db.table(table_).update(objet_.serialize())
+        # self.db.table(table_).update(set(key, value),query_)
+        # self.update(set({attr: value}), query_)
 
     def get_all(self, table_):
         return self.db.table(table_.upper()).all()

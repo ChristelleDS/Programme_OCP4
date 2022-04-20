@@ -37,8 +37,7 @@ class Controller:
                             q['date_heure_fin'], q['etat'])
         return tour_encours
 
-    @staticmethod
-    def creer_tournoi():
+    def creer_tournoi(self):
         nom = input('Nom du tournoi (un seul mot):')
         lieu = input('Lieu du tournoi?')
         debut = input('Date de debut (JJ/MM/AAAA) ?')
@@ -58,6 +57,7 @@ class Controller:
         matchs = []
         round1 = Tour(t.idtournoi, 'round1', matchs)
         db.insert(round1)
+        t.addTour(round1)
         db.insert(t)
 
     def inscrire_joueur(self):
@@ -103,8 +103,9 @@ class Controller:
         q = db.query_2('JOUEUR', 'nom', player_lastname, 'prenom', player_firstname)[0]
         player = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
                         q['points'], q['idjoueur'])
-        player.majClassement(input('Nouveau classement du joueur: '))
-        db.update(player)
+        newclassement = int(input('Nouveau classement du joueur: '))
+        # player.majClassement(newclassement)
+        db.update('classement', newclassement, q)
 
     def terminer_tournoi(self):
         tournoi = self.tournoi_encours()
@@ -114,6 +115,21 @@ class Controller:
     def get_all_tournois(self):
         return list(map(lambda x: str(x['idtournoi']) + " - " + x['nom'], db.get_all('tournoi')))
 
+    def get_all_idjoueurs_tournoi(self):
+        return db.query_1('TOURNOI', 'idtournoi', self.tournoi_encours().idtournoi)[0]['joueurs']
+
+    def get_all_idtours_tournoi(self):
+        return db.query_1('TOURNOI', 'idtournoi', self.tournoi_encours().idtournoi)[0]['tours']
+
     def get_all_joueurs(self):
-        players_list = list(map(lambda x: dict(x['idjoueur']) + " - "+ x['nom'] + " classement: " + str(x['classement']), db.get_all('joueur')))
+        players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " classement: "
+                                          + str(x['classement']), db.get_all('joueur')))
+        players_list.sort(reverse=False)
         return players_list
+
+    def query_double(self):
+        # récupération des id joueurs du tournoi en cours
+        q1 = self.db.query_1('TOURNOI', 'idtournoi', int(self.tournoi_encours().idtournoi))[0]['joueurs']
+        q2 = self.get_all_joueurs()
+        for q2['idjoueur'] in q1:
+            print(q2['idjoueur'] + " - " + q2['nom'] + " " + q2['prenom'] + " classé: " + q2['classement'])
