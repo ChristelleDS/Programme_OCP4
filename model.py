@@ -1,6 +1,7 @@
 import datetime      # pip install datetime?
 # import itertools     # pip install itertools?
 from tinydb import TinyDB, Query  # pip install tinydb
+from tinydb.operations import set
 
 
 class Tournoi:
@@ -18,15 +19,12 @@ class Tournoi:
         self.timecontrol = timecontrol
         self.description = description
         self.nbtours = int(nbtours)
-        # print(self.nom + " crée.")
 
     def addJoueur(self, joueur):
         self.joueurs.append(joueur.idjoueur)
-        return str(joueur) + " inscrit au tournoi."
 
     def addTour(self, tour):
         self.tours.append(tour.idtour)
-        print(tour.nom + " ajouté au " + self.nom)
 
     def cloturerTournoi(self):
         self.date_fin = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -97,7 +95,7 @@ class Joueur:
         self.sexe = sexe
         self.classement = int(classement)    # entier
         self.points = int(points)    # nb points
-        print(str("Joueur crée. ID: " + str(self.idjoueur)))
+        # print(str("Joueur crée. ID: " + str(self.idjoueur)))
 
     def __str__(self):
         return f"{self.nom} {self.prenom}"
@@ -132,7 +130,6 @@ class Tour:
         self.date_heure_fin = date_heure_fin
         self.etat = etat
         self.matchs = matchs
-        print(self.nom + " crée. ID: " + str(self.idtour))
 
     def serialize(self):
         return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'nom': self.nom,
@@ -197,11 +194,9 @@ class Database:
         table_ = str(type(objet_)).upper().split(".")[1][:-2]
         self.db.table(table_).insert(objet_.serialize())
 
-    def update(self, objet_):
-        table_ = str(type(objet_)).upper().split(".")[1][:-2]
-        self.db.table(table_).update(objet_.serialize())
-        # self.db.table(table_).update(set(key, value),query_)
-        # self.update(set({attr: value}), query_)
+    def update_item(self, table_, var1, val1, var_cond, val_cond):
+        q = Query()
+        self.db.table(table_.upper()).update(set(var1, val1), q[var_cond] == val_cond)
 
     def get_all(self, table_):
         return self.db.table(table_.upper()).all()
@@ -213,9 +208,6 @@ class Database:
     def query_2(self, table_, var_1, val_1, var_2, val_2):
         q = Query()
         return self.db.table(table_.upper()).search((q[var_1] == val_1) & (q[var_2] == val_2))
-
-    def get_list(self, object_):
-        return list(map(lambda x: x["id"], self.get_all(object_)))
 
     def get_current_tournament(self):
         return self.query_1('TOURNOI', 'date_fin', '')[0]['nom']
