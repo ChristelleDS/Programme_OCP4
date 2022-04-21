@@ -91,22 +91,25 @@ class Controller:
         nb_joueurs = len(tournoi_encours.joueurs)
         mid = int(nb_joueurs / 2)
         liste_joueurs = []
-        for id in tournoi_encours.joueurs:
-            q = db.query_1('JOUEUR', 'idjoueur', id)[0]
+        for j in tournoi_encours.joueurs:
+            q = db.query_1('JOUEUR', 'idjoueur', j)[0]
             joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
                             q['points'], q['idjoueur'])
             liste_joueurs.append(joueur)
-        paires.clear()  # réinitialiser la liste des paires
+        # réinitialiser la liste des paires
+        paires.clear()
         # tri des joueurs par classement et par points ( points à 0 lors du 1er tour)
         liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
         liste_joueurs.sort(key=lambda x: x.points, reverse=False)
         # génération des paires
-        for paire in map(lambda x, y: [x, y], liste_joueurs[0:mid], liste_joueurs[mid:nb_joueurs]):
+        for paire in map(lambda x, y: [x.idjoueur, y.idjoueur], liste_joueurs[0:mid], liste_joueurs[mid:nb_joueurs]):
             # cas des matchs déjà joués à coder
             paires.append(paire)
         # création des matchs
+        i = 1
         for p in paires:
-            match = Match(tour_encours.idtour, p[0], p[1])
+            idmatch = str('M'+i)
+            match = Match(tour_encours.idtour, p[0], p[1], idmatch)
             db.insert(match)
             tour_encours.addMatch(match)
             db.update(tour_encours)
@@ -149,10 +152,29 @@ class Controller:
         return db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['tours']
 
     def get_all_idmatchs_tournoi(self, idtournoi):
-        return db.query_1('MATCH', 'idtournoi', idtournoi)[0]['matchs']
+        return db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['matchs']
 
     def get_all_joueurs(self):
         players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " classement: "
                                           + str(x['classement']), db.get_all('joueur')))
         players_list.sort(reverse=False)  #tri par ordre alphabetique
         return players_list
+
+    def classement_general(self):
+        liste_joueurs = []
+        for j in db.get_all('JOUEUR'):
+            joueur = Joueur(j['nom'], j['prenom'], j['date_naissance'], j['sexe'], j['classement'],
+                        j['points'], j['idjoueur'])
+            liste_joueurs.append(joueur)
+        liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
+        return list(map(lambda x: " n°: " + str(x.classement) + " - " + x.nom + " " + x.prenom, liste_joueurs))
+
+    def classement_tournoi(self, idtournoi):
+        liste_joueurs = []
+        for j in db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['joueurs']:
+            q = db.query_1('JOUEUR', 'idjoueur', j)[0]
+            joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
+                        q['points'], q['idjoueur'])
+            liste_joueurs.append(joueur)
+        liste_joueurs.sort(key=lambda x: x.points, reverse=False)
+        return list(map(lambda x: "Points: " + str(x.points) + " - " + x.nom + " " + x.prenom, liste_joueurs))
