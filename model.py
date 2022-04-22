@@ -120,11 +120,11 @@ class Joueur:
 
 class Tour:
 
-    def __init__(self, idtournoi, nom_tour, matchs, idtour="T1",
+    def __init__(self, idtournoi, nom_tour, matchs, idtour,
                  date_heure_debut=datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
                  date_heure_fin="", etat="en cours"):
         self.idtournoi = idtournoi
-        self.idtour = str(idtournoi)+str(idtour)
+        self.idtour = idtour
         self.nom = nom_tour
         self.date_heure_debut = date_heure_debut
         self.date_heure_fin = date_heure_fin
