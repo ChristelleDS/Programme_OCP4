@@ -177,7 +177,7 @@ class Controller:
         return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['tours']
 
     def get_all_idmatchs_tournoi(self, idtournoi):
-        return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['matchs']
+        return self.db.query_1('MATCH', 'idtournoi', idtournoi)[0]
 
     def get_all_joueurs(self):
         players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " classement: "

@@ -152,7 +152,7 @@ class Match:
 
     def __init__(self, idtour, joueur1, joueur2, idmatch="M1", score1=0, score2=0):
         self.idtour = idtour
-        self.idtournoi = str(self.idtour)[0:2]
+        self.idtournoi = str(self.idtour)[0:1]
         self.idmatch = idmatch
         self.joueur1 = joueur1
         self.joueur2 = joueur2
