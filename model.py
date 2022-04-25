@@ -102,7 +102,6 @@ class Joueur:
 
     def __repr__(self):
         return f"{self.nom} {self.prenom}, classement : {self.classement}, points : {self.points}"
-        # return f"{self.idjoueur}"
 
     def serialize(self):
         return {'idjoueur': self.idjoueur, 'nom': self.nom, 'prenom': self.prenom,
@@ -110,11 +109,11 @@ class Joueur:
                 'points': self.points}
 
     def majClassement(self, newclassement):
-        self.classement = newclassement
+        self.classement = int(newclassement)
         print("classement mis à jour.")
 
     def majPoints(self, pointsgagnes):
-        self.points = self.points + pointsgagnes
+        self.points = int(self.points + pointsgagnes)
         print("score mis à jour")
 
 
@@ -159,28 +158,28 @@ class Match:
         self.joueur2 = joueur2
         self.score1 = int(score1)
         self.score2 = int(score2)
-        print("Match " + str(self.idmatch) + " crée." + str(self.joueur1) + " vs " + str(self.joueur2))
+        # print("Match " + str(self.idmatch) + " crée. Joueurs " + str(self.joueur1) + " vs " + str(self.joueur2))
 
     def serialize(self):
         return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'idmatch': self.idmatch,
                 'joueur1': self.joueur1, 'joueur2': self.joueur2,
                 'score1': self.score1, 'score2': self.score2}
 
-    def saveScore(self):
-        self.score1 = input("Score de " + str(self.joueur1) + " ?")
-        self.score2 = input("Score de " + str(self.joueur2) + " ?")
+    def saveScore(self, joueur1, joueur2):
+        self.score1 = input("Score de joueur " + str(self.joueur1) + " ?")
+        self.score2 = input("Score de joueur " + str(self.joueur2) + " ?")
         if self.score1 == self.score2:
-            self.joueur1.majPoints(0.5)
-            self.joueur2.majPoints(0.5)
+            joueur1.majPoints(0.5)
+            joueur2.majPoints(0.5)
             print("EGALITE: +0.5 points")
-            print(str(self.joueur1) + " : " + str(self.joueur1.points) + " points.")
-            print(str(self.joueur2) + " : " + str(self.joueur2.points) + " points.")
+            print(str(joueur1.prenom) + " : " + str(joueur1.points) + " points.")
+            print(str(joueur2.prenom) + " : " + str(joueur2.points) + " points.")
         elif self.score1 > self.score2:
-            self.joueur1.majPoints(1)
-            print(str(self.joueur1) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur1.points))
+            joueur1.majPoints(1)
+            print(str(joueur1.prenom) + " GAGNANT: + 1 point . Total de points: " + str(joueur1.points))
         elif self.score2 > self.score1:
-            self.joueur2.majPoints(1)
-            print(str(self.joueur2) + " GAGNANT: + 1 point . Total de points: " + str(self.joueur2.points))
+            joueur2.majPoints(1)
+            print(str(joueur2.prenom) + " GAGNANT: + 1 point . Total de points: " + str(joueur2.points))
 
 
 class Database:
@@ -208,6 +207,10 @@ class Database:
     def query_2(self, table_, var_1, val_1, var_2, val_2):
         q = Query()
         return self.db.table(table_.upper()).search((q[var_1] == val_1) & (q[var_2] == val_2))
+
+    def query_3(self, table_, var_1, val_1, var_2, val_2, var_3, val_3):
+        q = Query()
+        return self.db.table(table_.upper()).search((q[var_1] == val_1) & (q[var_2] == val_2) & (q[var_3] == val_3))
 
     def get_current_tournament(self):
         return self.query_1('TOURNOI', 'date_fin', '')[0]['nom']

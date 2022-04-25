@@ -57,7 +57,7 @@ class Controller:
         t.addTour(round1)
         self.db.insert(t)
 
-    def inscrire_joueur(self):
+    def inscrire_joueur(self):  # ajouter verifi nb de joueurs inscrits au tournoi
         tournoi = self.tournoi_encours()
         j_nom = input('Nom du joueur à inscrire:').upper()
         j_prenom = input('Prenom du joueur: ').lower()
@@ -85,7 +85,7 @@ class Controller:
             self.db.update_item('TOURNOI', 'joueurs', tournoi.joueurs, 'idtournoi', tournoi.idtournoi)
             print('Nouveau joueur crée et inscrit au tournoi')
 
-    def demarrer_tour(self):
+    def demarrer_tour(self):      # ajouter verif tous les joueurs inscrits au tournoi
         tournoi_encours = self.tournoi_encours()
         # réinitialiser la liste des paires
         paires = []
@@ -108,28 +108,53 @@ class Controller:
         # création des matchs
         i = 1
         tour_encours = self.tour_encours()
+        print('Liste des matchs à jouer: ')
         for p in paires:
             idmatch = str('M'+str(i))
             match = Match(tour_encours.idtour, p[0], p[1], idmatch)
             self.db.insert(match)
-            # sauvegarder le match sur l'instance du tour
-            tour_encours.addMatch(match)
             i = i + 1
-        print(tour_encours.matchs)
-        self.db.update_item('TOUR', 'matchs', tour_encours.matchs, 'idtour', tour_encours.idtour)
+            print('Joueur '+ str(p[0]) + ' vs ' + str(p[1]))
+
 
     def entrer_resultats_tour(self):
         tour_encours = self.tour_encours()
-        # pour chaque match:ctr
+        # pour chaque match du tour:
+        list_matchs = db.query_1('MATCH', 'idtour', tour_encours.idtour)
         # sauvegarde les scores du match (saveScore)
-        for match in tour_encours.matchs:
-            match.saveScore()
-            # db.update(match)
+        for m in list_matchs:
+            # reconstituer l'objet match
+            match = Match(m['idtour'], m['joueur1'], m['joueur2'], m['idmatch'], m['score1'], m['score2'])
+            # reconstituer les objets joueur
+            j1 = self.db.query_1('JOUEUR', 'idjoueur', match.joueur1)[0]
+            j2 = self.db.query_1('JOUEUR', 'idjoueur', match.joueur2)[0]
+            player1 = Joueur(j1['nom'], j1['prenom'], j1['date_naissance'], j1['sexe'], j1['idjoueur'],
+                             j1['classement'], j1['points'])
+            player2 = Joueur(j2['nom'], j2['prenom'], j2['date_naissance'], j2['sexe'], j2['idjoueur'],
+                             j2['classement'], j2['points'])
+            # maj les scores sur l'objet match
+            match.saveScore(player1, player2)
+            self.db.update_item('MATCH', 'score1', match.score1, 'idmatch', match.idmatch)
+            self.db.update_item('MATCH', 'score2', match.score2, 'idmatch', match.idmatch)
+            # sauvegarder le match sur l'instance du tour
+            tour_encours.addMatch(match)
+            print(tour_encours.matchs)
+            # maj les points des joueurs
+            self.db.update_item('JOUEUR', 'points', player1.points, 'idjoueur', match.joueur1)
+            self.db.update_item('JOUEUR', 'points', player2.points, 'idjoueur', match.joueur2)
+        # maj les scores sur l'instance du tour
+        self.db.update_item('TOUR', 'matchs', tour_encours.matchs, 'idtour', tour_encours.idtour)
         # cloturer le tour (cloturerTour) et maj
         tour_encours.cloturerTour()
         self.db.update_item('TOUR', 'etat', tour_encours.etat, 'idtour', tour_encours.idtour)
         self.db.update_item('TOUR', 'date_heure_fin', tour_encours.date_heure_fin, 'idtour', tour_encours.idtour)
         # Créer le tour suivant
+        indice_tour = int(tour_encours.idtour[2:])+1
+        nom_tour = 'round' + str(indice_tour)
+        idtour = str(self.tournoi_encours().idtournoi) + 'T' + str(indice_tour)
+        matchs = []
+        newtour = Tour(self.tournoi_encours().idtournoi, nom_tour, matchs, idtour)
+        self.db.insert(newtour)
 
     def maj_classement(self):
         player_lastname = input('Nom du joueur à mettre à jour :').upper()
