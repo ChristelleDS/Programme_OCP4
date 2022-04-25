@@ -66,15 +66,14 @@ class Controller:
             if q['idjoueur'] in tournoi.joueurs:  # le joueur est il déjà inscrit?
                 print('Ce joueur est déjà inscrit au tournoi.')
             else:
-                joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['idjoueur'],
-                                q['classement'], q['points'])
+                joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'],
+                                q['classement'], float(q['points']), q['idjoueur'])
                 tournoi.addJoueur(joueur)
                 print(joueur)
-                # db.update_item('TOURNOI', 'joueurs', tournoi.joueurs, 'idtournoi', tournoi.idtournoi)
         except IndexError:  # joueur inconnu en bdd, à créer
             j_naissance = input('Date de naissance:')
             j_sexe = input('Homme (H) ou Femme (F):')
-            j_classement = int(input('Classement général (0 par défaut, veuillez saisir un nombre entier):'))
+            j_classement = int(input('Classement général (0 par défaut):'))
             try:
                 j_idjoueur = max(list(map(lambda x: x['idjoueur'], self.db.get_all('joueur'))))+1
             except ValueError:  # cas du 1er joueur crée
@@ -98,7 +97,7 @@ class Controller:
             liste_joueurs.append(joueur)
         # tri des joueurs par classement et par points ( points à 0 lors du 1er tour)
         liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
-        liste_joueurs.sort(key=lambda x: x.points, reverse=False)
+        liste_joueurs.sort(key=lambda x: x.points, reverse=True)
         nb_joueurs = len(liste_joueurs)
         mid = int(nb_joueurs / 2)
         # génération des paires
@@ -128,10 +127,10 @@ class Controller:
             # reconstituer les objets joueur
             j1 = self.db.query_1('JOUEUR', 'idjoueur', match.joueur1)[0]
             j2 = self.db.query_1('JOUEUR', 'idjoueur', match.joueur2)[0]
-            player1 = Joueur(j1['nom'], j1['prenom'], j1['date_naissance'], j1['sexe'], j1['idjoueur'],
-                             j1['classement'], j1['points'])
-            player2 = Joueur(j2['nom'], j2['prenom'], j2['date_naissance'], j2['sexe'], j2['idjoueur'],
-                             j2['classement'], j2['points'])
+            player1 = Joueur(j1['nom'], j1['prenom'], j1['date_naissance'], j1['sexe'],
+                             j1['classement'], j1['points'], j1['idjoueur'])
+            player2 = Joueur(j2['nom'], j2['prenom'], j2['date_naissance'], j2['sexe'],
+                             j2['classement'], j2['points'], j2['idjoueur'])
             # maj les scores sur l'objet match
             match.saveScore(player1, player2)
             self.db.update_item('MATCH', 'score1', match.score1, 'idmatch', match.idmatch)
@@ -150,11 +149,14 @@ class Controller:
         self.db.update_item('TOUR', 'date_heure_fin', tour_encours.date_heure_fin, 'idtour', tour_encours.idtour)
         # Créer le tour suivant
         indice_tour = int(tour_encours.idtour[2:])+1
-        nom_tour = 'round' + str(indice_tour)
-        idtour = str(self.tournoi_encours().idtournoi) + 'T' + str(indice_tour)
-        matchs = []
-        newtour = Tour(self.tournoi_encours().idtournoi, nom_tour, matchs, idtour)
-        self.db.insert(newtour)
+        if indice_tour <= self.tournoi_encours().nbtours:
+            nom_tour = 'round' + str(indice_tour)
+            idtour = str(self.tournoi_encours().idtournoi) + 'T' + str(indice_tour)
+            matchs = []
+            newtour = Tour(self.tournoi_encours().idtournoi, nom_tour, matchs, idtour)
+            self.db.insert(newtour)
+        else:
+            print("Tous les tours ont été joués, veuillez terminer le tournoi.")
 
     def maj_classement(self):
         player_lastname = input('Nom du joueur à mettre à jour :').upper()
@@ -200,7 +202,7 @@ class Controller:
                             q['points'], q['idjoueur'])
             liste_joueurs.append(joueur)
         liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
-        liste_joueurs.sort(key=lambda x: x.points, reverse=False)
+        liste_joueurs.sort(key=lambda x: x.points, reverse=True)
         return list(map(lambda x: "Points: " + str(x.points) + " - " + x.nom + " " + x.prenom, liste_joueurs))
 
 

@@ -94,7 +94,7 @@ class Joueur:
         self.date_naissance = date_naissance
         self.sexe = sexe
         self.classement = int(classement)    # entier
-        self.points = int(points)    # nb points
+        self.points = float(points)    # nb points
         # print(str("Joueur crée. ID: " + str(self.idjoueur)))
 
     def __str__(self):
@@ -113,7 +113,7 @@ class Joueur:
         print("classement mis à jour.")
 
     def majPoints(self, pointsgagnes):
-        self.points = int(self.points + pointsgagnes)
+        self.points = self.points + float(pointsgagnes)
         print("score mis à jour")
 
 
