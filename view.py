@@ -17,14 +17,12 @@ class Menu:
     def report(self):
         message = """
             Voici la liste des reportings disponibles:
-            [1]: 
-            [2]:
-            [3]:
-            [4]:
-            [5]:
-            [6]:
-            [7]:
-            [8]:
-            [9]:
+            [1]: Classement général
+            [2]: Joueurs par ordre alphabétique
+            [3]: Liste des tournois
+            [4]: Liste des joueurs d'un tournoi
+            [5]: Classement d'un tournoi
+            [6]: Liste des matchs d'un tournoi
+            [7]: Liste des tours d'un tournoi
             [10]: retour à l'accueil
         """
