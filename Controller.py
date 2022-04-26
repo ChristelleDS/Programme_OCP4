@@ -181,6 +181,9 @@ class Controller:
     def get_all_idtours_tournoi(self, idtournoi):
         return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['tours']
 
+    def get_all_joueurs_tournoi(self, idtournoi):
+        return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['joueurs']
+
     def get_all_idmatchs_tournoi(self, idtournoi):
         q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] + " - Joueur " + str(x['joueur1']) + " vs " +
                                            str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
