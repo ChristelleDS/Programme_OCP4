@@ -84,37 +84,42 @@ class Controller:
             self.db.update_item('TOURNOI', 'joueurs', tournoi.joueurs, 'idtournoi', tournoi.idtournoi)
             print('Nouveau joueur crée et inscrit au tournoi')
 
-    def demarrer_tour(self):      # ajouter verif tous les joueurs inscrits au tournoi
+    def demarrer_tour(self):
         tournoi_encours = self.tournoi_encours()
-        # réinitialiser la liste des paires
-        paires = []
-        # paires.clear()
-        liste_joueurs = []
-        for j in tournoi_encours.joueurs:  # récupérer infos sur chaque joueur du tournoi
-            q = self.db.query_1('JOUEUR', 'idjoueur', j)[0]
-            joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
-                            q['points'], q['idjoueur'])
-            liste_joueurs.append(joueur)
-        # tri des joueurs par classement et par points ( points à 0 lors du 1er tour)
-        liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
-        liste_joueurs.sort(key=lambda x: x.points, reverse=True)
-        nb_joueurs = len(liste_joueurs)
-        mid = int(nb_joueurs / 2)
-        # génération des paires
-        for paire in map(lambda x, y: [x.idjoueur, y.idjoueur], liste_joueurs[0:mid], liste_joueurs[mid:nb_joueurs]):
-            # cas des matchs déjà joués à coder
-            paires.append(paire)
-        # création des matchs
-        i = 1
-        tour_encours = self.tour_encours()
-        print('Liste des matchs à jouer: ')
-        for p in paires:
-            idmatch = str('M'+str(i))
-            match = Match(tour_encours.idtour, p[0], p[1], idmatch)
-            self.db.insert(match)
-            i = i + 1
-            print('Joueur '+ str(p[0]) + ' vs ' + str(p[1]))
-
+        if len(tournoi_encours.joueurs) == 4: # remplacer par 8
+            # réinitialiser la liste des paires
+            paires_tour = []
+            liste_joueurs = []
+            for j in tournoi_encours.joueurs:  # récupérer infos sur chaque joueur du tournoi
+                q = self.db.query_1('JOUEUR', 'idjoueur', j)[0]
+                joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
+                                q['points'], q['idjoueur'])
+                liste_joueurs.append(joueur)
+            # tri des joueurs par classement et par points ( points à 0 lors du 1er tour)
+            liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
+            liste_joueurs.sort(key=lambda x: x.points, reverse=True)
+            nb_joueurs = len(liste_joueurs)
+            mid = int(nb_joueurs / 2)
+            # génération des paires
+            if self.tour_encours().nom == 'round1':
+                for paire in map(lambda x, y: [x.idjoueur, y.idjoueur], liste_joueurs[0:mid],
+                                 liste_joueurs[mid:nb_joueurs]):
+                    paires_tour.append(paire)
+            else:  # a coder def des paires tours suivants
+                print('tours suivants à coder')
+            # création des matchs
+            i = 1
+            tour_encours = self.tour_encours()
+            print('Liste des matchs à jouer: ')
+            for p in paires_tour:
+                idmatch = str('M'+str(i))
+                match = Match(tour_encours.idtour, p[0], p[1], idmatch)
+                self.db.insert(match)
+                i = i + 1
+                print('Joueur '+ str(p[0]) + ' vs ' + str(p[1]))
+        else:
+            print('Liste des joueurs incomplètes: ' + str(len(tournoi_encours.joueurs))
+                  + "/8 joueurs inscrits attendus.")
 
     def entrer_resultats_tour(self):
         tour_encours = self.tour_encours()
