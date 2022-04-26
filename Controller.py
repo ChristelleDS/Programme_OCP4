@@ -182,7 +182,11 @@ class Controller:
         return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['tours']
 
     def get_all_idmatchs_tournoi(self, idtournoi):
-        return self.db.query_1('MATCH', 'idtournoi', idtournoi)[0]
+        q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] + " - Joueur " + str(x['joueur1']) + " vs " +
+                                           str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
+                        self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))
+        var = "\n".join(q)
+        print(var)
 
     def get_all_joueurs(self):
         players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " classement: "

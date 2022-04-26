@@ -158,7 +158,6 @@ class Match:
         self.joueur2 = joueur2
         self.score1 = int(score1)
         self.score2 = int(score2)
-        # print("Match " + str(self.idmatch) + " crée. Joueurs " + str(self.joueur1) + " vs " + str(self.joueur2))
 
     def serialize(self):
         return {'idtournoi': self.idtournoi, 'idtour': self.idtour, 'idmatch': self.idmatch,
