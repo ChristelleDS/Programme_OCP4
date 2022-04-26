@@ -11,6 +11,20 @@ class Menu:
             [6]: Maj le classement d''un joueur\n
             [7]: Accés aux reports\n
             [X]: Sortir de l''application\n
-            """
+        """
         pass
 
+    def report(self):
+        message = """
+            Voici la liste des reportings disponibles:
+            [1]: 
+            [2]:
+            [3]:
+            [4]:
+            [5]:
+            [6]:
+            [7]:
+            [8]:
+            [9]:
+            [10]: retour à l'accueil
+        """
