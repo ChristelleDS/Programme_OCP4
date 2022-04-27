@@ -83,7 +83,7 @@ class Controller:
 
     def demarrer_tour(self):
         tournoi_encours = self.tournoi_encours()
-        if len(tournoi_encours.joueurs) == 4:  # remplacer par 8
+        if len(tournoi_encours.joueurs) == 8:
             # réinitialiser la liste des paires
             paires_tour = []
             liste_joueurs = []
@@ -163,9 +163,12 @@ class Controller:
     def maj_classement(self):
         player_lastname = input('Nom du joueur à mettre à jour :').upper()
         player_firstname = input('Prenom du joueur à mettre à jour :').lower()
-        j_id = self.db.query_2('JOUEUR', 'nom', player_lastname, 'prenom', player_firstname)[0].get('idjoueur')
-        newclassement = int(input('Nouveau classement du joueur: '))
-        self.db.update_item('JOUEUR', 'classement', newclassement, 'idjoueur', j_id)
+        try:
+            j_id = self.db.query_2('JOUEUR', 'nom', player_lastname, 'prenom', player_firstname)[0].get('idjoueur')
+            newclassement = int(input('Nouveau classement du joueur: '))
+            self.db.update_item('JOUEUR', 'classement', newclassement, 'idjoueur', j_id)
+        except IndexError:
+            print('Joueur inconnu')
 
     def terminer_tournoi(self):
         tournoi = self.tournoi_encours()
@@ -182,6 +185,7 @@ class Controller:
         return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['joueurs']
 
     def get_all_idmatchs_tournoi(self, idtournoi):
+        print('Liste des matchs pour le tournoi ' + str(idtournoi))
         q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] + " - Joueur " + str(x['joueur1']) + " vs " +
                                str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
                      self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))
@@ -189,12 +193,14 @@ class Controller:
         print(var)
 
     def get_all_joueurs(self):
-        players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " classement: "
-                                          + str(x['classement']), self.db.get_all('joueur')))
+        print('Liste des joueurs par ordre alphabétique:')
+        players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " (id:" + str(x['idjoueur']) +
+                                          ") classement: " + str(x['classement']), self.db.get_all('joueur')))
         players_list.sort(reverse=False)  # tri par ordre alphabetique
         return players_list
 
     def classement_general(self):
+        print('Classement général:')
         liste_joueurs = []
         for j in self.db.get_all('JOUEUR'):
             joueur = Joueur(j['nom'], j['prenom'], j['date_naissance'], j['sexe'], j['classement'],
@@ -204,6 +210,7 @@ class Controller:
         return list(map(lambda x: " n°: " + str(x.classement) + " - " + x.nom + " " + x.prenom, liste_joueurs))
 
     def classement_tournoi(self, idtournoi):
+        print('Classement du tournoi' + str(idtournoi))
         liste_joueurs = []
         for j in self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['joueurs']:
             q = self.db.query_1('JOUEUR', 'idjoueur', j)[0]

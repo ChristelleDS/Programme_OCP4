@@ -23,31 +23,24 @@ class Menu:
         option = input("Quelle action souhaitez vous réaliser ?")
         if option == '1':
             self.controller.creer_tournoi()
-            time.sleep(2)
-            self.home()
+            time.sleep(3)
         elif option == '2':
             self.controller.inscrire_joueur()
-            time.sleep(2)
-            self.home()
+            time.sleep(3)
         elif option == '3':
             self.controller.demarrer_tour()
-            time.sleep(2)
-            self.home()
+            time.sleep(3)
         elif option == '4':
             self.controller.entrer_resultats_tour()
-            time.sleep(2)
-            self.home()
+            time.sleep(3)
         elif option == '5':
             self.controller.terminer_tournoi()
-            time.sleep(2)
-            self.home()
+            time.sleep(3)
         elif option == '6':
             self.controller.maj_classement()
-            time.sleep(2)
-            self.home()
+            time.sleep(3)
         elif option == '7':
             self.report()
-            self.home()
         elif option.upper() == 'X':
             mess = """
             Sortie du programme?
@@ -58,14 +51,14 @@ class Menu:
             rep = input()
             if rep.upper() == 'O':
                 print('Le programme va fermer.')
-                time.sleep(2)
+                time.sleep(3)
                 print(exit())
             else:
                 self.home()
         else:
             print("Instruction non reconnue")
-            time.sleep(2)
-            self.home()
+            time.sleep(3)
+        self.home()
 
     def report(self):
         message = """
@@ -84,37 +77,30 @@ class Menu:
         if option == '1':
             print(self.controller.classement_general())
             time.sleep(5)
-            input('Appuyez sur "Entrée" pour revenir au menu')
         elif option == '2':
             print(self.controller.get_all_joueurs())
             time.sleep(5)
-            input('Appuyez sur "Entrée" pour revenir au menu')
         elif option == '3':
             print(self.controller.get_all_tournois())
             time.sleep(5)
-            input('Appuyez sur "Entrée" pour revenir au menu')
         elif option == '4':
-            print(self.controller.get_all_joueurs_tournoi(input('Id du tournoi?')))
+            print(self.controller.get_all_joueurs_tournoi(int(input('Id du tournoi?'))))
             time.sleep(5)
-            input('Appuyez sur "Entrée" pour revenir au menu')
         elif option == '5':
-            print(self.controller.classement_tournoi(input('Id du tournoi?')))
+            print(self.controller.classement_tournoi(int(input('Id du tournoi?'))))
             time.sleep(5)
-            input('Appuyez sur "Entrée" pour revenir au menu')
         elif option == '6':
-            print(self.controller.get_all_idmatchs_tournoi(input('Id du tournoi?')))
+            print(self.controller.get_all_idmatchs_tournoi(int(input('Id du tournoi?'))))
             time.sleep(5)
-            input('Appuyez sur "Entrée" pour revenir au menu')
         elif option == '7':
-            print(self.controller.get_all_idtours_tournoi(input('Id du tournoi?')))
+            print(self.controller.get_all_idtours_tournoi(int(input('Id du tournoi?'))))
             time.sleep(5)
-            input('Appuyez sur "Entrée" pour revenir au menu')
-        elif option == 'R':
+        elif option.upper() == 'R':
             self.home()
         else:
             print("Instruction non reconnue")
-            time.sleep(2)
-            self.report()
+            time.sleep(3)
+        self.report()
 
 ctr = Controller()
 menu = Menu(ctr)
