@@ -1,5 +1,4 @@
 from model import Tournoi, Tour, Joueur, Match, Database
-from View import Menu
 
 
 db = Database("db_echecs")
@@ -8,8 +7,6 @@ timecontrol_list = ['bullet', 'blitz', 'coup rapide']
 
 class Controller:
     def __init__(self):
-        self.menu = Menu()
-        # self.edito = Edito()
         self.db = db
 
     def reinitialize(self):
@@ -86,7 +83,7 @@ class Controller:
 
     def demarrer_tour(self):
         tournoi_encours = self.tournoi_encours()
-        if len(tournoi_encours.joueurs) == 4: # remplacer par 8
+        if len(tournoi_encours.joueurs) == 4:  # remplacer par 8
             # réinitialiser la liste des paires
             paires_tour = []
             liste_joueurs = []
@@ -116,7 +113,7 @@ class Controller:
                 match = Match(tour_encours.idtour, p[0], p[1], idmatch)
                 self.db.insert(match)
                 i = i + 1
-                print('Joueur '+ str(p[0]) + ' vs ' + str(p[1]))
+                print('Joueur ' + str(p[0]) + ' vs ' + str(p[1]))
         else:
             print('Liste des joueurs incomplètes: ' + str(len(tournoi_encours.joueurs))
                   + "/8 joueurs inscrits attendus.")
@@ -186,8 +183,8 @@ class Controller:
 
     def get_all_idmatchs_tournoi(self, idtournoi):
         q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] + " - Joueur " + str(x['joueur1']) + " vs " +
-                                           str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
-                        self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))
+                               str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
+                     self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))
         var = "\n".join(q)
         print(var)
 
@@ -216,6 +213,3 @@ class Controller:
         liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
         liste_joueurs.sort(key=lambda x: x.points, reverse=True)
         return list(map(lambda x: "Points: " + str(x.points) + " - " + x.nom + " " + x.prenom, liste_joueurs))
-
-
-ctr = Controller()
