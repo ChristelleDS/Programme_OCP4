@@ -38,51 +38,15 @@ class Tournoi:
                 'description': self.description, 'nbtours': self.nbtours
                 }
 
-    def genererPaires(self):
-        # réinitialisation en dehors de la classe ?
-        nb_joueurs = len(self.joueurs)
-        mid = int(nb_joueurs/2)
-        # 1er tour : tri par classement
-        if len(self.tours) == 1:
-            # REINITIALISATION des paires
-            del self.paires
-            # tri des joueurs par classement
-            self.joueurs.sort(key=lambda x: x.classement, reverse=False)
-            print("liste joueurs par classement:")
-            print(self.joueurs)
-            # définition des paires
-            for paire in map(lambda x, y: [x, y], self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
-                self.paires.append(paire)
-                # creer le match : paire = Match(current_tour, x.__name__, y.__name__, 0, 0)
-                # print(paire)
-        # tours suivants : tri par points et par classement si égalité de points
-        else:
-            pass
-            """
-            self.joueurs.sort(key=lambda x: x.classement, reverse=False)
-            self.joueurs.sort(key=lambda x: x.points, reverse=True)
-            print("liste joueurs par points:")
-            print(self.joueurs)
-            for paire in map(lambda x, y: [x, y], self.joueurs[0:mid], self.joueurs[mid:nb_joueurs]):
-                # vérifier que la combinaison n'a pas déjà été joué
-                if paire not in self.paires :  # matchs déjà joués self.tours.matchs
-                    self.paires.append(paire)
-                    print(paire)
-                    # créer le match
-                    newmatch = "m" + str(tour.idtour) + str(paire[0]) + str(paire[1])
-                    newmatch = Match(self.idtournoi, tour, paire[0], paire[1])
-                    db.insert(newmatch)
-                    # ajouter le match au tour
-                    tour.addMatch(newmatch)
-                    db.update(tour.matchs) # affiner : maj uniquement la liste des matchs
-
-                else:  # si paire déjà joué, second joueur = joueur suivant
-                    paire[1]=next(paire)[1]
-                    print(paire)
-                    paires.append(paire) 
-                    pass
-            """
-        print(self.paires)
+    @staticmethod
+    def get_paires_premier_tour(liste_joueurs):
+        nb_joueurs = len(liste_joueurs)
+        mid = len(liste_joueurs)/2
+        paires_tour = []
+        for paire in map(lambda x, y: [x.idjoueur, y.idjoueur], liste_joueurs[0:mid],
+                         liste_joueurs[mid:nb_joueurs]):
+            paires_tour.append(paire)
+        return paires_tour
 
 
 class Joueur:

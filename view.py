@@ -90,7 +90,7 @@ class Menu:
             print(self.controller.classement_tournoi(int(input('Id du tournoi?'))))
             time.sleep(5)
         elif option == '6':
-            print(self.controller.get_all_idmatchs_tournoi(int(input('Id du tournoi?'))))
+            print(self.controller.get_all_matchs_tournoi(int(input('Id du tournoi?'))))
             time.sleep(5)
         elif option == '7':
             print(self.controller.get_all_idtours_tournoi(int(input('Id du tournoi?'))))

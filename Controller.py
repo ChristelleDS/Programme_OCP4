@@ -81,40 +81,67 @@ class Controller:
             self.db.update_item('TOURNOI', 'joueurs', tournoi.joueurs, 'idtournoi', tournoi.idtournoi)
             print('Nouveau joueur crée et inscrit au tournoi')
 
+    def get_liste_joueurs(self):
+        # Méthode qui détermine la liste des joueurs du tournoi en cours, triée par classement et par points
+        tournoi_encours = self.tournoi_encours()
+        nb_joueurs = len(self.tournoi_encours().joueurs)
+        liste_joueurs = []
+        # recréer les instances de joueur et alimenter la liste
+        for j in tournoi_encours.joueurs:
+            q = self.db.query_1('JOUEUR', 'idjoueur', j)[0]
+            joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
+                            q['points'], q['idjoueur'])
+            liste_joueurs.append(joueur)
+        # trier les joueurs par classement et par points ( à 0 lors du 1er tour)
+        liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
+        liste_joueurs.sort(key=lambda x: x.points, reverse=True)
+        return liste_joueurs
+
+    def creer_matchs_tour(self, paires_tour):
+        # Méthode pour création des matchs du tour en cours, suite à la génération des paires
+        i = 1
+        tour_encours = self.tour_encours()
+        print('Liste des matchs à jouer: ')
+        for p in paires_tour:
+            idmatch = str('M' + str(i))
+            match = Match(tour_encours.idtour, p[0], p[1], idmatch)
+            self.db.insert(match)
+            i = i + 1
+            print('Joueur ' + str(p[0]) + ' vs ' + str(p[1]))
+
     def demarrer_tour(self):
         tournoi_encours = self.tournoi_encours()
-        if len(tournoi_encours.joueurs) == 8:
-            # réinitialiser la liste des paires
-            paires_tour = []
-            liste_joueurs = []
-            for j in tournoi_encours.joueurs:  # récupérer infos sur chaque joueur du tournoi
-                q = self.db.query_1('JOUEUR', 'idjoueur', j)[0]
-                joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
-                                q['points'], q['idjoueur'])
-                liste_joueurs.append(joueur)
-            # tri des joueurs par classement et par points ( points à 0 lors du 1er tour)
-            liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
-            liste_joueurs.sort(key=lambda x: x.points, reverse=True)
-            nb_joueurs = len(liste_joueurs)
-            mid = int(nb_joueurs / 2)
-            # génération des paires
+        liste_joueurs = self.get_liste_joueurs()
+        nb_joueurs = len(liste_joueurs)
+        paires_tour = []
+        # vérifier si le nombre d'inscrits au tournoi est conforme à l'attendu
+        if nb_joueurs == 8:
+            # génération des paires lors du 1er tour
             if self.tour_encours().nom == 'round1':
-                for paire in map(lambda x, y: [x.idjoueur, y.idjoueur], liste_joueurs[0:mid],
-                                 liste_joueurs[mid:nb_joueurs]):
+                # matching des joueurs selon le modèle :
+                # le meilleur avec le meilleur des moins bons, le second avec le 2e moins bon etc
+                # on crée 2 groupes de joueurs selon leur classement
+                mid = int(nb_joueurs / 2)
+                meilleurs = liste_joueurs[0:mid]
+                moins_bons = liste_joueurs[mid:nb_joueurs]
+                # on associe les joueurs pour définir les paires
+                for paire in map(lambda x, y: [x.idjoueur, y.idjoueur], meilleurs, moins_bons):
                     paires_tour.append(paire)
-            else:  # a coder def des paires tours suivants
+            # génération des paires lors des tours suivants
+            else:
+                matchs_joues = self.get_paires_jouees(tournoi_encours.idtournoi)
                 print('tours suivants à coder')
+                """
+                                else:  # si paire déjà joué, second joueur = joueur suivant
+                                    paire[1]=next(paire)[1]
+                                    print(paire)
+                                    paires.append(paire) 
+                                    pass
+                            """
             # création des matchs
-            i = 1
-            tour_encours = self.tour_encours()
-            print('Liste des matchs à jouer: ')
-            for p in paires_tour:
-                idmatch = str('M'+str(i))
-                match = Match(tour_encours.idtour, p[0], p[1], idmatch)
-                self.db.insert(match)
-                i = i + 1
-                print('Joueur ' + str(p[0]) + ' vs ' + str(p[1]))
+            self.creer_matchs_tour(paires_tour)
         else:
+            # pas assez d'inscrits au tournoi
             print('Liste des joueurs incomplètes: ' + str(len(tournoi_encours.joueurs))
                   + "/8 joueurs inscrits attendus.")
 
@@ -157,6 +184,7 @@ class Controller:
             matchs = []
             newtour = Tour(self.tournoi_encours().idtournoi, nom_tour, matchs, idtour)
             self.db.insert(newtour)
+            print(newtour.nom + " crée")
         else:
             print("Tous les tours ont été joués, veuillez terminer le tournoi.")
 
@@ -184,7 +212,7 @@ class Controller:
     def get_all_joueurs_tournoi(self, idtournoi):
         return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['joueurs']
 
-    def get_all_idmatchs_tournoi(self, idtournoi):
+    def get_all_matchs_tournoi(self, idtournoi):
         print('Liste des matchs pour le tournoi ' + str(idtournoi))
         q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] + " - Joueur " + str(x['joueur1']) + " vs " +
                                str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
@@ -220,3 +248,6 @@ class Controller:
         liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
         liste_joueurs.sort(key=lambda x: x.points, reverse=True)
         return list(map(lambda x: "Points: " + str(x.points) + " - " + x.nom + " " + x.prenom, liste_joueurs))
+
+    def get_paires_jouees(self, idtournoi):
+        return list(map(lambda x: [x['joueur1'], x['joueur2']], self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))
