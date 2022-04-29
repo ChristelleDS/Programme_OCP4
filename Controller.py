@@ -54,32 +54,40 @@ class Controller:
         t.addTour(round1)
         self.db.insert(t)
 
-    def inscrire_joueur(self):  # ajouter verifi nb de joueurs inscrits au tournoi
+    def inscrire_joueur(self):
         tournoi = self.tournoi_encours()
-        j_nom = input('Nom du joueur à inscrire:').upper()
-        j_prenom = input('Prenom du joueur: ').lower()
-        try:  # joueur connu en bdd
-            q = self.db.query_2('JOUEUR', 'nom', j_nom, 'prenom', j_prenom)[0]
-            if q['idjoueur'] in tournoi.joueurs:  # le joueur est il déjà inscrit?
-                print('Ce joueur est déjà inscrit au tournoi.')
-            else:
-                joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'],
-                                q['classement'], float(q['points']), q['idjoueur'])
-                tournoi.addJoueur(joueur)
-                print(joueur)
-        except IndexError:  # joueur inconnu en bdd, à créer
-            j_naissance = input('Date de naissance:')
-            j_sexe = input('Homme (H) ou Femme (F):')
-            j_classement = int(input('Classement général (0 par défaut):'))
+        # vérification si place encore disponible pour inscrire un nouveau joueur:
+        if len(tournoi.joueurs) < tournoi.nbtours*2 :
+            j_nom = input('Nom du joueur à inscrire:').upper()
+            j_prenom = input('Prenom du joueur: ').lower()
+            # vérifier si joueur déjà connu en base de données
             try:
-                j_idjoueur = max(list(map(lambda x: x['idjoueur'], self.db.get_all('joueur'))))+1
-            except ValueError:  # cas du 1er joueur crée
-                j_idjoueur = 1
-            newjoueur = Joueur(j_nom, j_prenom, j_naissance, j_sexe, int(j_classement), 0, j_idjoueur)
-            self.db.insert(newjoueur)
-            tournoi.addJoueur(newjoueur)
-            self.db.update_item('TOURNOI', 'joueurs', tournoi.joueurs, 'idtournoi', tournoi.idtournoi)
-            print('Nouveau joueur crée et inscrit au tournoi')
+                q = self.db.query_2('JOUEUR', 'nom', j_nom, 'prenom', j_prenom)[0]
+                # vérifier que le joueur n'est pas déjà inscrit au tournoi
+                if q['idjoueur'] in tournoi.joueurs:
+                    print('Ce joueur est déjà inscrit au tournoi.')
+                else:
+                    # inscrire le joueur
+                    joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'],
+                                    q['classement'], float(q['points']), q['idjoueur'])
+                    tournoi.addJoueur(joueur)
+                    print(joueur)
+            # joueur à créer:
+            except IndexError:
+                j_naissance = input('Date de naissance:')
+                j_sexe = input('Homme (H) ou Femme (F):')
+                j_classement = int(input('Classement général (0 par défaut):'))
+                try:
+                    j_idjoueur = max(list(map(lambda x: x['idjoueur'], self.db.get_all('joueur'))))+1
+                except ValueError:  # cas du 1er joueur crée
+                    j_idjoueur = 1
+                newjoueur = Joueur(j_nom, j_prenom, j_naissance, j_sexe, int(j_classement), 0, j_idjoueur)
+                self.db.insert(newjoueur)
+                tournoi.addJoueur(newjoueur)
+                self.db.update_item('TOURNOI', 'joueurs', tournoi.joueurs, 'idtournoi', tournoi.idtournoi)
+                print('Nouveau joueur crée et inscrit au tournoi')
+        else:
+            print('Tournoi complet, nouvelle inscription impossible.')
 
     def get_liste_joueurs(self):
         # Méthode qui détermine la liste des joueurs du tournoi en cours, triée par classement et par points
@@ -130,7 +138,14 @@ class Controller:
             # génération des paires lors des tours suivants
             else:
                 matchs_joues = self.get_paires_jouees(tournoi_encours.idtournoi)
-                print('tours suivants à coder')
+                test = []
+                l = liste_joueurs
+                # génération des combinaisons possibles
+                for i in range(8):
+                    for j in range(i + 1, 8):
+                        if ([l[i], l[j]] not in matchs_joues) and ([l[j], l[i]] not in matchs_joues) :
+                            test.append([l[i], l[j], i + j])
+                print(test)
                 """
                                 else:  # si paire déjà joué, second joueur = joueur suivant
                                     paire[1]=next(paire)[1]
@@ -189,10 +204,10 @@ class Controller:
             print("Tous les tours ont été joués, veuillez terminer le tournoi.")
 
     def maj_classement(self):
-        player_lastname = input('Nom du joueur à mettre à jour :').upper()
-        player_firstname = input('Prenom du joueur à mettre à jour :').lower()
+        lastname = input('Nom du joueur à mettre à jour :').upper()
+        firstname = input('Prenom du joueur à mettre à jour :').lower()
         try:
-            j_id = self.db.query_2('JOUEUR', 'nom', player_lastname, 'prenom', player_firstname)[0].get('idjoueur')
+            j_id = self.db.query_2('JOUEUR', 'nom', lastname, 'prenom', firstname)[0].get('idjoueur')
             newclassement = int(input('Nouveau classement du joueur: '))
             self.db.update_item('JOUEUR', 'classement', newclassement, 'idjoueur', j_id)
         except IndexError:
@@ -204,50 +219,52 @@ class Controller:
         self.db.update_item('TOURNOI', 'date_fin', tournoi.date_fin, 'idtournoi', tournoi.idtournoi)
 
     def get_all_tournois(self):
-        return list(map(lambda x: str(x['idtournoi']) + " - " + x['nom'], self.db.get_all('tournoi')))
+        print('liste des tournois:')
+        print("\n".join(list(map(lambda x: str(x['idtournoi']) + " - " + x['nom'], self.db.get_all('tournoi')))))
 
     def get_all_idtours_tournoi(self, idtournoi):
+        print('Liste des tours du tournoi:')
         return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['tours']
 
     def get_all_joueurs_tournoi(self, idtournoi):
+        print('Liste des joueurs du tournoi:')
         return self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['joueurs']
 
     def get_all_matchs_tournoi(self, idtournoi):
-        print('Liste des matchs pour le tournoi ' + str(idtournoi))
+        print('Liste des matchs pour le tournoi: ' + str(idtournoi))
         q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] + " - Joueur " + str(x['joueur1']) + " vs " +
                                str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
                      self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))
-        var = "\n".join(q)
-        print(var)
+        print("\n".join(q))
 
     def get_all_joueurs(self):
         print('Liste des joueurs par ordre alphabétique:')
         players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " (id:" + str(x['idjoueur']) +
                                           ") classement: " + str(x['classement']), self.db.get_all('joueur')))
         players_list.sort(reverse=False)  # tri par ordre alphabetique
-        return players_list
+        print("\n".join(players_list))
 
     def classement_general(self):
         print('Classement général:')
-        liste_joueurs = []
+        liste = []
         for j in self.db.get_all('JOUEUR'):
             joueur = Joueur(j['nom'], j['prenom'], j['date_naissance'], j['sexe'], j['classement'],
                             j['points'], j['idjoueur'])
-            liste_joueurs.append(joueur)
-        liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
-        return list(map(lambda x: " n°: " + str(x.classement) + " - " + x.nom + " " + x.prenom, liste_joueurs))
+            liste.append(joueur)
+        liste.sort(key=lambda x: x.classement, reverse=False)
+        print("\n".join(list(map(lambda x: " n°: " + str(x.classement) + " - " + x.nom + " " + x.prenom, liste))))
 
     def classement_tournoi(self, idtournoi):
         print('Classement du tournoi' + str(idtournoi))
-        liste_joueurs = []
+        liste = []
         for j in self.db.query_1('TOURNOI', 'idtournoi', idtournoi)[0]['joueurs']:
             q = self.db.query_1('JOUEUR', 'idjoueur', j)[0]
             joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'], q['classement'],
                             q['points'], q['idjoueur'])
-            liste_joueurs.append(joueur)
-        liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
-        liste_joueurs.sort(key=lambda x: x.points, reverse=True)
-        return list(map(lambda x: "Points: " + str(x.points) + " - " + x.nom + " " + x.prenom, liste_joueurs))
+            liste.append(joueur)
+        liste.sort(key=lambda x: x.classement, reverse=False)
+        liste.sort(key=lambda x: x.points, reverse=True)
+        print("\n".join(list(map(lambda x: "Points: " + str(x.points) + " - " + x.nom + " " + x.prenom, liste))))
 
     def get_paires_jouees(self, idtournoi):
         return list(map(lambda x: [x['joueur1'], x['joueur2']], self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))

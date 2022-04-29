@@ -62,7 +62,7 @@ class Joueur:
         # print(str("Joueur crée. ID: " + str(self.idjoueur)))
 
     def __str__(self):
-        return f"{self.nom} {self.prenom}"
+        return f"{self.idjoueur} {self.nom} {self.prenom}"
 
     def __repr__(self):
         return f"{self.nom} {self.prenom}, classement : {self.classement}, points : {self.points}"
