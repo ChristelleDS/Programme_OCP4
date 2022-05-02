@@ -57,7 +57,7 @@ class Controller:
     def inscrire_joueur(self):
         tournoi = self.tournoi_encours()
         # vérification si place encore disponible pour inscrire un nouveau joueur:
-        if len(tournoi.joueurs) < tournoi.nbtours*2 :
+        if len(tournoi.joueurs) < tournoi.nbtours*2:
             j_nom = input('Nom du joueur à inscrire:').upper()
             j_prenom = input('Prenom du joueur: ').lower()
             # vérifier si joueur déjà connu en base de données
@@ -92,7 +92,6 @@ class Controller:
     def get_liste_joueurs(self):
         # Méthode qui détermine la liste des joueurs du tournoi en cours, triée par classement et par points
         tournoi_encours = self.tournoi_encours()
-        nb_joueurs = len(self.tournoi_encours().joueurs)
         liste_joueurs = []
         # recréer les instances de joueur et alimenter la liste
         for j in tournoi_encours.joueurs:
@@ -128,31 +127,42 @@ class Controller:
             if self.tour_encours().nom == 'round1':
                 # matching des joueurs selon le modèle :
                 # le meilleur avec le meilleur des moins bons, le second avec le 2e moins bon etc
-                # on crée 2 groupes de joueurs selon leur classement
                 mid = int(nb_joueurs / 2)
                 meilleurs = liste_joueurs[0:mid]
                 moins_bons = liste_joueurs[mid:nb_joueurs]
                 # on associe les joueurs pour définir les paires
                 for paire in map(lambda x, y: [x.idjoueur, y.idjoueur], meilleurs, moins_bons):
                     paires_tour.append(paire)
-            # génération des paires lors des tours suivants
             else:
+                # génération des paires lors des tours suivants
                 matchs_joues = self.get_paires_jouees(tournoi_encours.idtournoi)
-                test = []
-                l = liste_joueurs
-                # génération des combinaisons possibles
-                for i in range(8):
-                    for j in range(i + 1, 8):
-                        if ([l[i], l[j]] not in matchs_joues) and ([l[j], l[i]] not in matchs_joues) :
-                            test.append([l[i], l[j], i + j])
-                print(test)
-                """
-                                else:  # si paire déjà joué, second joueur = joueur suivant
-                                    paire[1]=next(paire)[1]
-                                    print(paire)
-                                    paires.append(paire) 
-                                    pass
-                            """
+                lj = []      # liste des joueurs dans les paires générées pour le tour en cours
+                for i in range(0, nb_joueurs-1):
+                    j1 = liste_joueurs[i].idjoueur
+                    j2 = liste_joueurs[i+1].idjoueur
+                    # vérifier si les joueurs n'ont pas déjà été associé dans une combinaison
+                    # si c'est le cas, essayer l'association de j1 avec le joueur suivant
+                    if j1 in list(set(lj)):
+                        print('paire déjà générée pour joueur1')
+                        continue
+                    elif j2 in list(set(lj)):
+                        while r in range(i+2, nb_joueurs-1) and liste_joueurs[r].idjoueur in list(set(lj)):
+                            r = r+1
+                        j2 = liste_joueurs[r].idjoueur
+                    else:
+                        paire = [j1, j2]
+                        paire_reverse = [j2, j1]
+                        print(paire)
+                        # cette paire a t'elle déjà été joué ou générée
+                        if paire in matchs_joues or paire_reverse in matchs_joues or paire in paires_tour \
+                                or paire_reverse in paires_tour:
+                            print('combinaison déjà traitée')
+                        else:
+                            paires_tour.append(paire)
+                            lj.extend(j1, j2)
+                            # lj.append(j1)
+                            # lj.append(j2)
+            print(paires_tour)
             # création des matchs
             self.creer_matchs_tour(paires_tour)
         else:
@@ -233,14 +243,14 @@ class Controller:
     def get_all_matchs_tournoi(self, idtournoi):
         print('Liste des matchs pour le tournoi: ' + str(idtournoi))
         q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] + " - Joueur " + str(x['joueur1']) + " vs " +
-                               str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
+                     str(x['joueur2']) + " Score: " + str(x['score1']) + "/" + str(x['score2']),
                      self.db.query_1('MATCH', 'idtournoi', str(idtournoi))))
         print("\n".join(q))
 
     def get_all_joueurs(self):
         print('Liste des joueurs par ordre alphabétique:')
         players_list = list(map(lambda x: x['nom'] + " " + x['prenom'] + " (id:" + str(x['idjoueur']) +
-                                          ") classement: " + str(x['classement']), self.db.get_all('joueur')))
+                            ") classement: " + str(x['classement']), self.db.get_all('joueur')))
         players_list.sort(reverse=False)  # tri par ordre alphabetique
         print("\n".join(players_list))
 

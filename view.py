@@ -1,4 +1,3 @@
-from Controller import Controller
 import time
 
 
@@ -101,7 +100,3 @@ class Menu:
             print("Instruction non reconnue")
             time.sleep(3)
         self.report()
-
-ctr = Controller()
-menu = Menu(ctr)
-menu.home()
