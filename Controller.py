@@ -10,7 +10,7 @@ class Controller:
         self.db = db
 
     def reinitialize(self):
-        self.db.truncate("JOUEUR")
+        # self.db.truncate("JOUEUR")
         self.db.truncate("MATCH")
         self.db.truncate("TOURNOI")
         self.db.truncate("TOUR")
@@ -31,28 +31,33 @@ class Controller:
         return tour_encours
 
     def creer_tournoi(self):
-        nom = input('Nom du tournoi:')
-        lieu = input('Lieu du tournoi?')
-        debut = input('Date de debut (JJ/MM/AAAA) ?')
-        timecontrol = input('Contrôle du temps (bullet, blitz ou coup rapide?): ')
-        if timecontrol.lower() in timecontrol_list:
-            pass
-        else:
+        # verifier si tournoi en cours
+        try :
+            self.db.query_1('TOURNOI', 'date_fin', '')[0]
+            print("Veuillez terminer le tournoi en cours avant d'en créer un nouveau.")
+        except IndexError:
+            nom = input('Nom du tournoi:')
+            lieu = input('Lieu du tournoi?')
+            debut = input('Date de debut (JJ/MM/AAAA) ?')
             timecontrol = input('Contrôle du temps (bullet, blitz ou coup rapide?): ')
-        description = input('Description?')
-        tours = []
-        joueurs = []
-        try:
-            idtournoi = max(list(map(lambda x: x['idtournoi'], self.db.get_all('tournoi')))) + 1
-        except ValueError:
-            idtournoi = 1
-        t = Tournoi(nom, lieu, debut, timecontrol, description, tours, joueurs, idtournoi)
-        matchs = []
-        idtour = str(t.idtournoi)+'T1'
-        round1 = Tour(t.idtournoi, 'round1', matchs, idtour)
-        self.db.insert(round1)
-        t.addTour(round1)
-        self.db.insert(t)
+            if timecontrol.lower() in timecontrol_list:
+                pass
+            else:
+                timecontrol = input('Contrôle du temps (bullet, blitz ou coup rapide?): ')
+            description = input('Description?')
+            tours = []
+            joueurs = []
+            try:
+                idtournoi = max(list(map(lambda x: x['idtournoi'], self.db.get_all('tournoi')))) + 1
+            except ValueError:    # création du 1er tournoi
+                idtournoi = 1
+            t = Tournoi(nom, lieu, debut, timecontrol, description, tours, joueurs, idtournoi)
+            matchs = []
+            idtour = str(t.idtournoi)+'T1'
+            round1 = Tour(t.idtournoi, 'round1', matchs, idtour)
+            self.db.insert(round1)
+            t.addTour(round1)
+            self.db.insert(t)
 
     def inscrire_joueur(self):
         tournoi = self.tournoi_encours()
@@ -67,11 +72,13 @@ class Controller:
                 if q['idjoueur'] in tournoi.joueurs:
                     print('Ce joueur est déjà inscrit au tournoi.')
                 else:
-                    # inscrire le joueur
+                    # inscrire le joueur et remettre ses points à zero
                     joueur = Joueur(q['nom'], q['prenom'], q['date_naissance'], q['sexe'],
-                                    q['classement'], float(q['points']), q['idjoueur'])
+                                    q['classement'], 0, q['idjoueur'])
                     tournoi.addJoueur(joueur)
-                    print(joueur)
+                    self.db.update_item('TOURNOI', 'joueurs', tournoi.joueurs, 'idtournoi', tournoi.idtournoi)
+                    self.db.update_item('JOUEUR', 'points', joueur.points, 'idjoueur', joueur.idjoueur)
+                    print(str(joueur) + " inscrit au tournoi.")
             # joueur à créer:
             except IndexError:
                 j_naissance = input('Date de naissance:')
@@ -137,9 +144,12 @@ class Controller:
                 # génération des paires lors des tours suivants
                 matchs_joues = self.get_paires_jouees(tournoi_encours.idtournoi)
                 lj = []      # liste des joueurs dans les paires générées pour le tour en cours
+                print("reinit de la liste des joueurs des paires du tour:")
+                print(lj)
                 for i in range(0, nb_joueurs-1):
                     j1 = liste_joueurs[i].idjoueur
                     j2 = liste_joueurs[i+1].idjoueur
+                    print([j1, j2])
                     # vérifier si les joueurs n'ont pas déjà été associé dans une combinaison
                     # si c'est le cas, essayer l'association de j1 avec le joueur suivant
                     if j1 in list(set(lj)):
@@ -147,21 +157,26 @@ class Controller:
                         continue
                     elif j2 in list(set(lj)):
                         while r in range(i+2, nb_joueurs-1) and liste_joueurs[r].idjoueur in list(set(lj)):
+                            print(r)
                             r = r+1
                         j2 = liste_joueurs[r].idjoueur
+                        print('j2 : '+ str(j2))
                     else:
-                        paire = [j1, j2]
-                        paire_reverse = [j2, j1]
-                        print(paire)
-                        # cette paire a t'elle déjà été joué ou générée
-                        if paire in matchs_joues or paire_reverse in matchs_joues or paire in paires_tour \
-                                or paire_reverse in paires_tour:
-                            print('combinaison déjà traitée')
-                        else:
-                            paires_tour.append(paire)
-                            lj.extend(j1, j2)
-                            # lj.append(j1)
-                            # lj.append(j2)
+                        pass
+                    paire = [j1, j2]
+                    paire_reverse = [j2, j1]
+                    print(paire)
+                    # cette paire a t'elle déjà été joué ou générée
+                    if paire in matchs_joues or paire_reverse in matchs_joues or paire in paires_tour \
+                            or paire_reverse in paires_tour:
+                        print('combinaison déjà traitée')
+                    else:
+                        paires_tour.append(paire)
+                        print("paire ajoutée")
+                        # lj.extend(j1, j2)
+                        lj.append(j1)
+                        lj.append(j2)
+                print(lj)
             print(paires_tour)
             # création des matchs
             self.creer_matchs_tour(paires_tour)
