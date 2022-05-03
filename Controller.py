@@ -10,7 +10,7 @@ class Controller:
         self.db = db
 
     def reinitialize(self):
-        # self.db.truncate("JOUEUR")
+        self.db.truncate("JOUEUR")
         self.db.truncate("MATCH")
         self.db.truncate("TOURNOI")
         self.db.truncate("TOUR")
@@ -30,8 +30,8 @@ class Controller:
     def tour_encours(self):
         q = self.db.query_1('TOUR', 'etat', 'en cours')[0]
         tour_encours = Tour(q['idtournoi'], q['nom'], q['matchs'],
-                            q['idtour'], q['date_heure_debut'],
-                            q['date_heure_fin'], q['etat'])
+                            q['idtour'], q['date_debut'],
+                            q['date_fin'], q['etat'])
         return tour_encours
 
     def creer_tournoi(self):
@@ -111,8 +111,7 @@ class Controller:
             print('Tournoi complet, nouvelle inscription impossible.')
 
     def get_liste_joueurs(self):
-        # Méthode qui détermine la liste des joueurs du tournoi en cours,
-        # tri par classement et par points
+        # Méthode qui détermine la liste des joueurs du tournoi en cours
         tournoi_encours = self.tournoi_encours()
         liste_joueurs = []
         # recréer les instances de joueur et alimenter la liste
@@ -122,7 +121,7 @@ class Controller:
                             q['sexe'], q['classement'],
                             q['points'], q['idjoueur'])
             liste_joueurs.append(joueur)
-        # tri par classement et par points ( à 0 lors du 1er tour)
+        # Trier par classement, puis par points
         liste_joueurs.sort(key=lambda x: x.classement, reverse=False)
         liste_joueurs.sort(key=lambda x: x.points, reverse=True)
         return liste_joueurs
@@ -139,75 +138,69 @@ class Controller:
             i = i + 1
             print('Joueur ' + str(p[0]) + ' vs ' + str(p[1]))
 
+    def get_first_paires(self, liste_joueurs):
+        # Méthode qui génère les paires pour le 1er tour
+        paires_tour = []
+        nb_joueurs = len(liste_joueurs)
+        mid = int(nb_joueurs / 2)
+        meilleurs = liste_joueurs[0:mid]
+        moins_bons = liste_joueurs[mid:nb_joueurs]
+        for paire in map(lambda x, y: [x.idjoueur, y.idjoueur],
+                         meilleurs, moins_bons):
+            paires_tour.append(paire)
+        return paires_tour
+
+    def get_next_paires(self, tournoi):
+        # Méthode qui génère les paires pour les tours suivants
+        paires_tour = []
+        matchs_joues = self.get_paires_jouees(tournoi.idtournoi)
+        liste_joueurs = self.get_liste_joueurs()
+        nb_joueurs = len(liste_joueurs)
+        lj = []  # liste des joueurs déjà associés
+        for i in range(0, nb_joueurs - 1):
+            j1 = liste_joueurs[i].idjoueur
+            j2 = liste_joueurs[i + 1].idjoueur
+            # vérifier si les joueurs n'ont pas déjà été associé
+            if j1 in list(set(lj)):
+                continue
+            elif j2 in list(set(lj)):
+                # identifier un joueur suivant qui n'est pas associé
+                r = i + 2
+                while r in range(i + 2, nb_joueurs - 1) and \
+                        liste_joueurs[r].idjoueur in list(set(lj)):
+                    r = r + 1
+                j2 = liste_joueurs[r].idjoueur
+            else:
+                pass
+            paire = [j1, j2]
+            paire_reverse = [j2, j1]
+            # cette paire a t'elle déjà été joué
+            if paire in matchs_joues \
+                    or paire_reverse in matchs_joues:
+                pass
+            else:
+                paires_tour.append(paire)
+                lj.append(j1)
+                lj.append(j2)
+        return paires_tour
+
     def demarrer_tour(self):
         tournoi_encours = self.tournoi_encours()
         liste_joueurs = self.get_liste_joueurs()
         nb_joueurs = len(liste_joueurs)
-        paires_tour = []
         # vérifier le nombre d'inscrits au tournoi
         if nb_joueurs == 8:
             # génération des paires lors du 1er tour
             if self.tour_encours().nom == 'round1':
-                # matching des joueurs selon le modèle :
-                # le meilleur avec le meilleur des moins bons,
-                # le second avec le 2e moins bon etc
-                mid = int(nb_joueurs / 2)
-                meilleurs = liste_joueurs[0:mid]
-                moins_bons = liste_joueurs[mid:nb_joueurs]
-                # on associe les joueurs pour définir les paires
-                for paire in map(lambda x, y: [x.idjoueur, y.idjoueur],
-                                 meilleurs, moins_bons):
-                    paires_tour.append(paire)
+                paires_tour = self.get_first_paires(liste_joueurs)
             else:
                 # génération des paires lors des tours suivants
-                matchs_joues = self.get_paires_jouees(
-                    tournoi_encours.idtournoi)
-                lj = []   # liste des joueurs dans les paires déjà générées
-                print("reinit de la liste des joueurs des paires du tour:")
-                print(lj)
-                for i in range(0, nb_joueurs-1):
-                    j1 = liste_joueurs[i].idjoueur
-                    j2 = liste_joueurs[i+1].idjoueur
-                    print([j1, j2])
-                    # vérifier si les joueurs n'ont pas déjà été associé
-                    # essayer l'association de j1 avec le joueur suivant
-                    if j1 in list(set(lj)):
-                        print('paire déjà générée pour joueur1')
-                        continue
-                    elif j2 in list(set(lj)):
-                        r = i+2
-                        while r in range(i+2, nb_joueurs-1) and \
-                                liste_joueurs[r].idjoueur in list(set(lj)):
-                            print(r)
-                            r = r+1
-                        j2 = liste_joueurs[r].idjoueur
-                        print('j2 : ' + str(j2))
-                    else:
-                        pass
-                    paire = [j1, j2]
-                    paire_reverse = [j2, j1]
-                    print(paire)
-                    # cette paire a t'elle déjà été joué ou générée
-                    if paire in matchs_joues \
-                            or paire_reverse in matchs_joues \
-                            or paire in paires_tour \
-                            or paire_reverse in paires_tour:
-                        print('combinaison déjà traitée')
-                    else:
-                        paires_tour.append(paire)
-                        print("paire ajoutée")
-                        # lj.extend(j1, j2)
-                        lj.append(j1)
-                        lj.append(j2)
-                print(lj)
-            print(paires_tour)
+                paires_tour = self.get_next_paires(tournoi_encours)
             # création des matchs
+            print(paires_tour)
             self.creer_matchs_tour(paires_tour)
         else:
-            # pas assez d'inscrits au tournoi
-            print('Liste des joueurs incomplètes: '
-                  + str(len(tournoi_encours.joueurs))
-                  + "/8 joueurs inscrits attendus.")
+            print("Pas assez de joueurs inscrits")
 
     def entrer_resultats_tour(self):
         tour_encours = self.tour_encours()
@@ -235,16 +228,15 @@ class Controller:
                                 'idmatch', match.idmatch)
             # sauvegarder le match sur l'instance du tour
             tour_encours.addMatch(match)
-            print(tour_encours.matchs)
-            # maj les points des joueurs
+            # maj les points des joueurs en base
             self.db.update_item('JOUEUR', 'points', player1.points,
                                 'idjoueur', match.joueur1)
             self.db.update_item('JOUEUR', 'points', player2.points,
                                 'idjoueur', match.joueur2)
-        # maj les scores sur l'instance du tour
+        # maj les matchs sur l'instance du tour
         self.db.update_item('TOUR', 'matchs', tour_encours.matchs,
                             'idtour', tour_encours.idtour)
-        # cloturer le tour (cloturerTour) et maj
+        # cloturer le tour et maj en base
         tour_encours.cloturerTour()
         self.db.update_item('TOUR', 'etat', tour_encours.etat,
                             'idtour', tour_encours.idtour)
@@ -252,15 +244,19 @@ class Controller:
                             tour_encours.date_fin,
                             'idtour', tour_encours.idtour)
         # Créer le tour suivant
+        tournoi_encours = self.tournoi_encours()
         indice_tour = int(tour_encours.idtour[2:])+1
-        if indice_tour <= self.tournoi_encours().nbtours:
+        if indice_tour <= tournoi_encours.nbtours:
             nom_tour = 'round' + str(indice_tour)
-            idtour = str(self.tournoi_encours().idtournoi) +\
+            idtour = str(tournoi_encours.idtournoi) +\
                 'T' + str(indice_tour)
             matchs = []
-            newtour = Tour(self.tournoi_encours().idtournoi, nom_tour,
+            newtour = Tour(tournoi_encours.idtournoi, nom_tour,
                            matchs, idtour)
             self.db.insert(newtour)
+            tournoi_encours.addTour(newtour)
+            self.db.update_item('TOURNOI', 'tours', tournoi_encours.tours,
+                                'idtournoi', tournoi_encours.idtournoi)
             print(newtour.nom + " crée")
         else:
             print("Tous les tours ont été joués, terminez le tournoi.")

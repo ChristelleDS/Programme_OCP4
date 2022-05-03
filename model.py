@@ -66,7 +66,6 @@ class Joueur:
         self.sexe = sexe
         self.classement = int(classement)    # entier
         self.points = float(points)    # nb points
-        # print(str("Joueur crée. ID: " + str(self.idjoueur)))
 
     def __str__(self):
         return f"{self.idjoueur} {self.nom} {self.prenom}"
@@ -91,7 +90,6 @@ class Joueur:
 
     def majPoints(self, pointsgagnes):
         self.points = self.points + float(pointsgagnes)
-        print("score mis à jour")
 
 
 class Tour:
@@ -121,7 +119,6 @@ class Tour:
         result_j2 = [match.joueur2, match.score2]
         match_result = (result_j1, result_j2)
         self.matchs.append(match_result)
-        print("Match ajouté au tour.")
 
     def cloturerTour(self):
         self.etat = "Terminé"
@@ -151,8 +148,15 @@ class Match:
                 'score2': self.score2}
 
     def saveScore(self, joueur1, joueur2):
-        self.score1 = input("Score de joueur " + str(self.joueur1) + " ?")
-        self.score2 = input("Score de joueur " + str(self.joueur2) + " ?")
+        while True:
+            tempo = input("Score de joueur " + str(self.joueur1) + " ?")
+            tempo2 = input("Score de joueur " + str(self.joueur2) + " ?")
+            try:
+                self.score1 = int(tempo)
+                self.score2 = int(tempo2)
+                break
+            except ValueError:
+                print("Saisie incorrecte !")
         if self.score1 == self.score2:
             joueur1.majPoints(0.5)
             joueur2.majPoints(0.5)
