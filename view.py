@@ -19,7 +19,7 @@ class Menu:
             [X]: Sortir de l''application\n
         """
         print(message)
-        option = input("Quelle action souhaitez vous réaliser ?")
+        option = input("Quelle action réaliser ?")
         if option == '1':
             self.controller.creer_tournoi()
             time.sleep(3)
@@ -72,7 +72,7 @@ class Menu:
             [R]: retour à l'accueil
         """
         print(message)
-        option = str(input("Quelle action souhaitez vous réaliser ?"))
+        option = str(input("Quelle action réaliser ?"))
         if option == '1':
             print(self.controller.classement_general())
             time.sleep(5)
@@ -83,16 +83,20 @@ class Menu:
             print(self.controller.get_all_tournois())
             time.sleep(5)
         elif option == '4':
-            print(self.controller.get_all_joueurs_tournoi(int(input('Id du tournoi?'))))
+            print(self.controller.get_all_joueurs_tournoi(
+                int(input('Id du tournoi?'))))
             time.sleep(5)
         elif option == '5':
-            print(self.controller.classement_tournoi(int(input('Id du tournoi?'))))
+            print(self.controller.classement_tournoi(
+                int(input('Id du tournoi?'))))
             time.sleep(5)
         elif option == '6':
-            print(self.controller.get_all_matchs_tournoi(int(input('Id du tournoi?'))))
+            print(self.controller.get_all_matchs_tournoi(
+                int(input('Id du tournoi?'))))
             time.sleep(5)
         elif option == '7':
-            print(self.controller.get_all_idtours_tournoi(int(input('Id du tournoi?'))))
+            print(self.controller.get_all_idtours_tournoi(
+                int(input('Id du tournoi?'))))
             time.sleep(5)
         elif option.upper() == 'R':
             self.home()
