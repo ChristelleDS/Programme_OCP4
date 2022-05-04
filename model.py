@@ -42,17 +42,6 @@ class Tournoi:
                 'nbtours': self.nbtours
                 }
 
-    @staticmethod
-    def get_paires_premier_tour(liste_joueurs):
-        nb_joueurs = len(liste_joueurs)
-        mid = len(liste_joueurs)/2
-        paires_tour = []
-        for paire in map(lambda x, y: [x.idjoueur, y.idjoueur],
-                         liste_joueurs[0:mid],
-                         liste_joueurs[mid:nb_joueurs]):
-            paires_tour.append(paire)
-        return paires_tour
-
 
 class Joueur:
 

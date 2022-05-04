@@ -64,6 +64,7 @@ class Controller:
             self.db.insert(round1)
             t.addTour(round1)
             self.db.insert(t)
+            print("Nouveau tournoi crée.")
 
     def inscrire_joueur(self):
         tournoi = self.tournoi_encours()
@@ -189,7 +190,7 @@ class Controller:
         liste_joueurs = self.get_liste_joueurs()
         nb_joueurs = len(liste_joueurs)
         # vérifier le nombre d'inscrits au tournoi
-        if nb_joueurs == 8:
+        if nb_joueurs == tournoi_encours.nbtours*2:
             # génération des paires lors du 1er tour
             if self.tour_encours().nom == 'round1':
                 paires_tour = self.get_first_paires(liste_joueurs)
@@ -321,10 +322,9 @@ class Controller:
                             j['points'], j['idjoueur'])
             liste.append(joueur)
         liste.sort(key=lambda x: x.classement, reverse=False)
-        print("\n".join(list(map(lambda x: " n°: " +
-                                           str(x.classement) +
-                                           " - " + x.nom +
-                                           " " + x.prenom,
+        print("\n".join(list(map(lambda x: " n°: " + str(x.classement)
+                                           + x.nom + " " + x.prenom +
+                                           " (id: " + str(x.idjoueur) + ")",
                                  liste))))
 
     def classement_tournoi(self, idtournoi):
