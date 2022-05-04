@@ -1,5 +1,4 @@
 import datetime      # pip install datetime?
-# import itertools     # pip install itertools?
 from tinydb import TinyDB, Query  # pip install tinydb
 from tinydb.operations import set
 
