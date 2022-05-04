@@ -1,4 +1,5 @@
 from model import Tournoi, Tour, Joueur, Match, Database
+from itertools import combinations
 
 
 db = Database("db_echecs")
@@ -258,7 +259,7 @@ class Controller:
             tournoi_encours.addTour(newtour)
             self.db.update_item('TOURNOI', 'tours', tournoi_encours.tours,
                                 'idtournoi', tournoi_encours.idtournoi)
-            print(newtour.nom + " crée")
+            print(newtour.nom + " à démarrer.")
         else:
             print("Tous les tours ont été joués, terminez le tournoi.")
 
