@@ -4,7 +4,6 @@ from tinydb.operations import set
 
 
 class Tournoi:
-    paires = []
 
     def __init__(self, nom, lieu, date_debut, timecontrol, description,
                  tours, joueurs, idtournoi=1, nbtours=4, date_fin=''):
@@ -136,6 +135,7 @@ class Match:
                 'score2': self.score2}
 
     def saveScore(self, joueur1, joueur2):
+        # Saisir le score
         while True:
             tempo = input("Score de joueur " + str(self.joueur1) + " ?")
             tempo2 = input("Score de joueur " + str(self.joueur2) + " ?")
@@ -145,6 +145,7 @@ class Match:
                 break
             except ValueError:
                 print("Saisie incorrecte !")
+        # maj les points
         if self.score1 == self.score2:
             joueur1.majPoints(0.5)
             joueur2.majPoints(0.5)

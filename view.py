@@ -75,29 +75,29 @@ class Menu:
         option = str(input("Quelle action réaliser ?"))
         if option == '1':
             print(self.controller.classement_general())
-            time.sleep(5)
+            time.sleep(4)
         elif option == '2':
             print(self.controller.get_all_joueurs())
-            time.sleep(5)
+            time.sleep(4)
         elif option == '3':
             print(self.controller.get_all_tournois())
-            time.sleep(5)
+            time.sleep(4)
         elif option == '4':
             print(self.controller.get_all_joueurs_tournoi(
                 int(input('Id du tournoi?'))))
-            time.sleep(5)
+            time.sleep(4)
         elif option == '5':
             print(self.controller.classement_tournoi(
                 int(input('Id du tournoi?'))))
-            time.sleep(5)
+            time.sleep(4)
         elif option == '6':
             print(self.controller.get_all_matchs_tournoi(
                 int(input('Id du tournoi?'))))
-            time.sleep(5)
+            time.sleep(4)
         elif option == '7':
             print(self.controller.get_all_idtours_tournoi(
                 int(input('Id du tournoi?'))))
-            time.sleep(5)
+            time.sleep(4)
         elif option.upper() == 'R':
             self.home()
         else:

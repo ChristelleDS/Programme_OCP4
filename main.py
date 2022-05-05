@@ -1,5 +1,5 @@
-from View import Menu
-from Controller import Controller
+from view import Menu
+from controller import Controller
 
 ctr = Controller()
 menu = Menu(ctr)
