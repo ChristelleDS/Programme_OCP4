@@ -133,11 +133,24 @@ class Controller:
         tour_encours = self.tour_encours()
         print('Liste des matchs à jouer: ')
         for p in paires_tour:
-            idmatch = str('M' + str(i))
+            try:
+                idmatch = max(list(map(lambda x: x['idmatch'],
+                                       self.db.get_all('match')))) + 1
+            except ValueError:
+                idmatch = 1
             match = Match(tour_encours.idtour, p[0], p[1], idmatch)
             self.db.insert(match)
             i = i + 1
             print('Joueur ' + str(p[0]) + ' vs ' + str(p[1]))
+
+    def creer_match_tour_manuel(self):
+        j1 = input('Id du joueur 1:')
+        j2 = input('Id du joueur 2:')
+        if j1 == j2:
+            print("Saisie invalide")
+        else:
+            paire = [[j1, j2]]
+            self.creer_matchs_tour(paire)
 
     def get_first_paires(self, liste_joueurs):
         # Génère les paires pour le 1er tour
