@@ -147,22 +147,21 @@ class Controller:
         n = len(self.db.query_1('MATCH', 'idtour', self.tour_encours().idtour))
         tournoi = self.tournoi_encours().idtournoi
         if n < self.tournoi_encours().nbtours:
-            j1 = int(input('Id du joueur 1:'))
-            j2 = int(input('Id du joueur 2:'))
-            if j1 == j2:
+            j1 = input('Id du joueur 1:')
+            j2 = input('Id du joueur 2:')
+            if j1 == j2 \
+                    or j1 is None\
+                    or j2 is None:
                 print("Saisie invalide")
                 self.creer_match_tour_manuel()
-            elif j1 is None or j2 is None:
-                print("Saisie invalide")
-                self.creer_match_tour_manuel()
-            elif [j1, j2] in self.get_paires_jouees(tournoi) \
-                    or [j2, j1] in self.get_paires_jouees(tournoi):
+            elif [int(j1), int(j2)] in self.get_paires_jouees(tournoi) \
+                    or [int(j2), int(j1)] in self.get_paires_jouees(tournoi):
                 print("Match déjà crée.")
             else:
-                paire = [[j1, j2]]
+                paire = [[int(j1), int(j2)]]
                 self.creer_matchs_tour(paire)
         else:
-            print('Matchs à jouer déjà crées.')
+            print('Action impossible, tous les matchs sont déjà crées.')
 
     def get_first_paires(self, liste_joueurs):
         # Génère les paires pour le 1er tour
