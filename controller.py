@@ -131,7 +131,7 @@ class Controller:
     def creer_matchs_tour(self, paires_tour):
         i = 1
         tour_encours = self.tour_encours()
-        print('Liste des matchs à jouer: ')
+        print('Match(s) créé(s): ')
         for p in paires_tour:
             try:
                 idmatch = max(list(map(lambda x: x['idmatch'],
@@ -144,13 +144,25 @@ class Controller:
             print('Joueur ' + str(p[0]) + ' vs ' + str(p[1]))
 
     def creer_match_tour_manuel(self):
-        j1 = input('Id du joueur 1:')
-        j2 = input('Id du joueur 2:')
-        if j1 == j2:
-            print("Saisie invalide")
+        n = len(self.db.query_1('MATCH', 'idtour', self.tour_encours().idtour))
+        tournoi = self.tournoi_encours().idtournoi
+        if n < self.tournoi_encours().nbtours:
+            j1 = int(input('Id du joueur 1:'))
+            j2 = int(input('Id du joueur 2:'))
+            if j1 == j2:
+                print("Saisie invalide")
+                self.creer_match_tour_manuel()
+            elif j1 is None or j2 is None:
+                print("Saisie invalide")
+                self.creer_match_tour_manuel()
+            elif [j1, j2] in self.get_paires_jouees(tournoi) \
+                    or [j2, j1] in self.get_paires_jouees(tournoi):
+                print("Match déjà crée.")
+            else:
+                paire = [[j1, j2]]
+                self.creer_matchs_tour(paire)
         else:
-            paire = [[j1, j2]]
-            self.creer_matchs_tour(paire)
+            print('Matchs à jouer déjà crées.')
 
     def get_first_paires(self, liste_joueurs):
         # Génère les paires pour le 1er tour
@@ -221,7 +233,7 @@ class Controller:
 
     def entrer_resultats_tour(self):
         tour_encours = self.tour_encours()
-        list_matchs = db.query_1('MATCH', 'idtour', tour_encours.idtour)
+        list_matchs = self.db.query_1('MATCH', 'idtour', tour_encours.idtour)
         # pour chaque match du tour:
         # sauvegarde les scores
         for m in list_matchs:
@@ -295,6 +307,7 @@ class Controller:
         tournoi.cloturerTournoi()
         self.db.update_item('TOURNOI', 'date_fin', tournoi.date_fin,
                             'idtournoi', tournoi.idtournoi)
+        self.classement_tournoi(tournoi.idtournoi)
 
     def get_all_tournois(self):
         print('liste des tournois:')
@@ -312,7 +325,7 @@ class Controller:
 
     def get_all_matchs_tournoi(self, idtournoi):
         print('Liste des matchs pour le tournoi: ' + str(idtournoi))
-        q = list(map(lambda x: x['idtour'] + " " + x['idmatch'] +
+        q = list(map(lambda x: x['idtour'] + " " + str(x['idmatch']) +
                      " - Joueur " + str(x['joueur1']) +
                      " vs " + str(x['joueur2']) +
                      " Score: " + str(x['score1']) +
