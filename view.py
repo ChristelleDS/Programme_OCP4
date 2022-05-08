@@ -5,6 +5,21 @@ class Menu:
     def __init__(self, controller):
         self.controller = controller
 
+    def quitter_programme(self):
+        mess = """
+                    Sortie du programme?
+                    [O]: OUI
+                    [N]: NON
+                    """
+        print(mess)
+        rep = input()
+        if rep.upper() == 'O':
+            print('Le programme va fermer.')
+            time.sleep(3)
+            print(exit())
+        else:
+            self.home()
+
     def home(self):
         message = """
             Bienvenue sur la page d'accueil\n
@@ -45,19 +60,7 @@ class Menu:
         elif option == '8':
             self.report()
         elif option.upper() == 'X':
-            mess = """
-            Sortie du programme?
-            [O]: OUI
-            [N]: NON
-            """
-            print(mess)
-            rep = input()
-            if rep.upper() == 'O':
-                print('Le programme va fermer.')
-                time.sleep(3)
-                print(exit())
-            else:
-                self.home()
+            self.quitter_programme()
         else:
             print("Instruction non reconnue")
             time.sleep(3)

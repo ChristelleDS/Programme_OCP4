@@ -44,8 +44,7 @@ class Tournoi:
 
 class Joueur:
 
-    def __init__(self, nom, prenom, date_naissance, sexe,
-                 classement=0, points=0, idjoueur=1):
+    def __init__(self, nom, prenom, date_naissance, sexe, classement=0, points=0, idjoueur=1):
         self.idjoueur = int(idjoueur)
         self.nom = str(nom)
         self.prenom = str(prenom)
@@ -115,8 +114,7 @@ class Tour:
 
 class Match:
 
-    def __init__(self, idtour, joueur1, joueur2,
-                 idmatch="M1", score1=0, score2=0):
+    def __init__(self, idtour, joueur1, joueur2, idmatch="1", score1=0, score2=0):
         self.idtour = idtour
         self.idtournoi = str(self.idtour)[0:1]
         self.idmatch = idmatch
@@ -150,20 +148,14 @@ class Match:
             joueur1.majPoints(0.5)
             joueur2.majPoints(0.5)
             print("EGALITE: +0.5 points")
-            print(str(joueur1.prenom) + " : " +
-                  str(joueur1.points) + " points.")
-            print(str(joueur2.prenom) + " : " +
-                  str(joueur2.points) + " points.")
+            print(str(joueur1.prenom) + " : " + str(joueur1.points) + " points.")
+            print(str(joueur2.prenom) + " : " + str(joueur2.points) + " points.")
         elif self.score1 > self.score2:
             joueur1.majPoints(1)
-            print(str(joueur1.prenom) +
-                  " GAGNANT: + 1 point . Total de points: " +
-                  str(joueur1.points))
+            print(str(joueur1.prenom) + " GAGNANT: + 1 point . Total de points: " + str(joueur1.points))
         elif self.score2 > self.score1:
             joueur2.majPoints(1)
-            print(str(joueur2.prenom) +
-                  " GAGNANT: + 1 point . Total de points: " +
-                  str(joueur2.points))
+            print(str(joueur2.prenom) + " GAGNANT: + 1 point . Total de points: " + str(joueur2.points))
 
 
 class Database:
@@ -179,8 +171,7 @@ class Database:
 
     def update_item(self, table_, var1, val1, var_cond, val_cond):
         q = Query()
-        self.db.table(table_.upper()).update(set(var1, val1),
-                                             q[var_cond] == val_cond)
+        self.db.table(table_.upper()).update(set(var1, val1), q[var_cond] == val_cond)
 
     def get_all(self, table_):
         return self.db.table(table_.upper()).all()
@@ -191,14 +182,11 @@ class Database:
 
     def query_2(self, table_, var_1, val_1, var_2, val_2):
         q = Query()
-        return self.db.table(table_.upper()).search((q[var_1] == val_1)
-                                                    & (q[var_2] == val_2))
+        return self.db.table(table_.upper()).search((q[var_1] == val_1) & (q[var_2] == val_2))
 
     def query_3(self, table_, var_1, val_1, var_2, val_2, var_3, val_3):
         q = Query()
-        return self.db.table(table_.upper()).search((q[var_1] == val_1)
-                                                    & (q[var_2] == val_2)
-                                                    & (q[var_3] == val_3))
+        return self.db.table(table_.upper()).search((q[var_1] == val_1) & (q[var_2] == val_2) & (q[var_3] == val_3))
 
     def get_current_tournament(self):
         return self.query_1('TOURNOI', 'date_fin', '')[0]['nom']
