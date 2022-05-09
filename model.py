@@ -1,5 +1,5 @@
-import datetime      # pip install datetime?
-from tinydb import TinyDB, Query  # pip install tinydb
+import datetime
+from tinydb import TinyDB, Query
 from tinydb.operations import set
 
 
