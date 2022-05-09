@@ -35,29 +35,18 @@ class Menu:
         """
         print(message)
         option = input("Quelle action réaliser ?")
-        if option == '1':
-            self.controller.creer_tournoi()
+        dicto = {'1': 'self.controller.creer_tournoi()',
+                 '2': 'self.controller.inscrire_joueur()',
+                 '3': 'self.controller.demarrer_tour()',
+                 '4': 'self.controller.entrer_resultats_tour()',
+                 '5': 'self.controller.terminer_tournoi()',
+                 '6': 'self.controller.maj_classement()',
+                 '7': 'self.report()',
+                 'X': 'self.quitter_programme()'}
+        try:
+            eval(dicto[option.upper()])
             time.sleep(3)
-        elif option == '2':
-            self.controller.inscrire_joueur()
-            time.sleep(3)
-        elif option == '3':
-            self.controller.demarrer_tour()
-            time.sleep(3)
-        elif option == '4':
-            self.controller.entrer_resultats_tour()
-            time.sleep(3)
-        elif option == '5':
-            self.controller.terminer_tournoi()
-            time.sleep(3)
-        elif option == '6':
-            self.controller.maj_classement()
-            time.sleep(3)
-        elif option == '7':
-            self.report()
-        elif option.upper() == 'X':
-            self.quitter_programme()
-        else:
+        except KeyError:
             print("Instruction non reconnue")
             time.sleep(3)
         self.home()
@@ -76,34 +65,18 @@ class Menu:
         """
         print(message)
         option = str(input("Quelle action réaliser ?"))
-        if option == '1':
-            print(self.controller.classement_general())
-            time.sleep(4)
-        elif option == '2':
-            print(self.controller.get_all_joueurs())
-            time.sleep(4)
-        elif option == '3':
-            print(self.controller.get_all_tournois())
-            time.sleep(4)
-        elif option == '4':
-            print(self.controller.get_all_joueurs_tournoi(
-                int(input('Id du tournoi?'))))
-            time.sleep(4)
-        elif option == '5':
-            print(self.controller.classement_tournoi(
-                int(input('Id du tournoi?'))))
-            time.sleep(4)
-        elif option == '6':
-            print(self.controller.get_all_matchs_tournoi(
-                int(input('Id du tournoi?'))))
-            time.sleep(4)
-        elif option == '7':
-            print(self.controller.get_all_idtours_tournoi(
-                int(input('Id du tournoi?'))))
-            time.sleep(4)
-        elif option.upper() == 'R':
-            self.home()
-        else:
+        dicto = {'1': 'self.controller.classement_general()',
+                 '2': 'self.controller.get_all_joueurs()',
+                 '3': 'self.controller.get_all_tournois()',
+                 '4': 'print(self.controller.get_all_joueurs_tournoi(int(input(\'Id du tournoi?\'))))',
+                 '5': 'print(self.controller.classement_tournoi(int(input(\'Id du tournoi?\'))))',
+                 '6': 'print(self.controller.get_all_matchs_tournoi(int(input(\'Id du tournoi?\'))))',
+                 '7': 'print(self.controller.get_all_idtours_tournoi(int(input(\'Id du tournoi?\'))))',
+                 'R': 'self.home()'}
+        try:
+            eval(dicto[option.upper()])
+            time.sleep(3)
+        except KeyError:
             print("Instruction non reconnue")
             time.sleep(3)
         self.report()
