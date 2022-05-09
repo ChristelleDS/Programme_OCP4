@@ -1,4 +1,4 @@
-from model import Tournoi, Tour, Joueur, Match, Database
+from model.model import Tournoi, Tour, Joueur, Match, Database
 from itertools import combinations
 
 
