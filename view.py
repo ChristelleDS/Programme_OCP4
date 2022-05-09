@@ -28,10 +28,9 @@ class Menu:
             [2]: Inscrire un joueur au tournoi\n
             [3]: Démarrer un tour\n
             [4]: Entrer les résultats du tour\n
-            [5]: Créer manuellement un match\n
-            [6]: Terminer le tournoi\n
-            [7]: Maj le classement d''un joueur\n
-            [8]: Accés aux reports\n
+            [5]: Terminer le tournoi\n
+            [6]: Maj le classement d'un joueur\n
+            [7]: Accés aux reports\n
             [X]: Sortir de l''application\n
         """
         print(message)
@@ -49,15 +48,12 @@ class Menu:
             self.controller.entrer_resultats_tour()
             time.sleep(3)
         elif option == '5':
-            self.controller.creer_match_tour_manuel()
-            time.sleep(3)
-        elif option == '6':
             self.controller.terminer_tournoi()
             time.sleep(3)
-        elif option == '7':
+        elif option == '6':
             self.controller.maj_classement()
             time.sleep(3)
-        elif option == '8':
+        elif option == '7':
             self.report()
         elif option.upper() == 'X':
             self.quitter_programme()
